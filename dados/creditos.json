@@ -29,7 +29,8 @@
     {
       "titulo": "Agradecimentos especiais",
       "pessoas": [
-        { "nome": "Matheus" }
+        { "nome": "Matheus" },
+        { "nome": "Sarah" }
       ]
     }
   ],
