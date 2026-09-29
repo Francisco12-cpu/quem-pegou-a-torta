@@ -1,0 +1,24 @@
+{
+  "_como_editar": "Lista de nomes que o jogador NÃO pode usar. Maiúsculas, minúsculas e acentos não importam ('MAXWELL', 'Maxwell' e 'maxwell' são iguais). Palavrões comuns já são barrados sozinhos pelo filtro de português (profanity-br); aqui vão só os bloqueios extras que você quiser. Este campo é ignorado pelo jogo.",
+
+  "mensagemProibido": "Essa palavra não pode ser utilizada.",
+
+  "proibidos": [
+    "cacete",
+    "hitler",
+    "nazista"
+  ],
+
+  "_especiais": "Nomes de brincadeira: cada grupo tem os nomes e a mensagem que aparece. O nome é recusado (não dá pra continuar com ele). Também pega se o nome estiver junto de outro, ex.: 'Matheus Silva'.",
+
+  "especiais": [
+    {
+      "nomes": ["Maxwell", "Sebastião", "Matheus", "Guilherme"],
+      "mensagem": "Essa palavra é muito feia e não pode ser utilizada."
+    },
+    {
+      "nomes": ["Francisco", "Francisco Audir", "Audir", "filho.af"],
+      "mensagem": "Você não pode usar coisas do criador."
+    }
+  ]
+}

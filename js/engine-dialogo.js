@@ -143,7 +143,13 @@ var MotorDialogo = (function () {
     elementos.nomeFalante.style.setProperty("--cor-falante", cor || "#ffd479");
   }
 
+  // {nome} nas falas vira o nome que o jogador escolheu
+  function comNome(texto) {
+    return String(texto).replace(/\{nome\}/g, buscarPersonagem("protagonista").nome);
+  }
+
   function mostrarTexto(texto) {
+    texto = comNome(texto);
     elementos.textoFala.textContent = texto;
     elementos.textoFala.classList.remove("aparecendo");
     void elementos.textoFala.offsetWidth;
@@ -166,7 +172,7 @@ var MotorDialogo = (function () {
     if (fala.mostrarItem) Interface.mostrarCartao(fala.mostrarItem);
     else Interface.esconderCartao();
 
-    registrarHistorico(ehNarrador ? null : nomeExibido, fala.texto, p && p.cor);
+    registrarHistorico(ehNarrador ? null : nomeExibido, comNome(fala.texto), p && p.cor);
   }
 
   // ---- Escolhas (decorativas ou reais) ----

@@ -12,6 +12,12 @@ var CONFIG = {
   ferramentasDeTeste: "local",
 
   // ---------------------------------------------------------------------------------------
+  // NOME DO JOGADOR (tela "Escolha seu nome", depois da abertura)
+  // Limite de letras do nome. Palavras bloqueadas e nomes de brincadeira ficam em
+  // dados/prohibited-names.json.
+  nomeMaxCaracteres: 14,
+
+  // ---------------------------------------------------------------------------------------
   // CENA ESPECIAL (o GIF da chuva de estrelas)
   // Coloque o arquivo em assets/especiais/ com o nome abaixo. Formatos aceitos:
   //   .gif ou .webp (animados)  -> mostrados como imagem

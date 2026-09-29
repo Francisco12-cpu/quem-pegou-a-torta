@@ -12,4 +12,5 @@ var estado = {
   ingredientes: [],
   acusacaoEscolhida: null,
   inicio: null, // Date.now() ao apertar "Jogar"
+  nomeJogador: null, // nome escolhido na tela "Escolha seu nome" (vale a sessão toda)
 };

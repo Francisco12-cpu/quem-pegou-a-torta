@@ -10,7 +10,7 @@ var CENA_01_CONFEITARIA = {
     {
       quemFala: "narrador",
       texto:
-        "Era uma tarde tranquila em Ponyville. A protagonista tinha uma missão bem simples: comprar alguns doces para o lanche da tarde.",
+        "Era uma tarde tranquila em Ponyville. {nome} tinha uma missão bem simples: comprar alguns doces para o lanche da tarde.",
     },
     {
       quemFala: "pinkie",
@@ -82,7 +82,7 @@ var CENA_01_CONFEITARIA = {
     },
     {
       quemFala: "narrador",
-      texto: "Depois de vasculhar o balcão e as mesas, a protagonista encontra migalhas... e uma lista.",
+      texto: "Depois de vasculhar o balcão e as mesas, {nome} encontra migalhas... e uma lista.",
     },
     {
       quemFala: "protagonista",

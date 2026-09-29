@@ -61,6 +61,7 @@
     );
     window.addEventListener("keydown", function (e) {
       // usou teclado de verdade (setas/letras): volta pro modo teclado
+      if (e.target && /^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return; // digitando o nome
       if (/^(Arrow|Key)/.test(e.code)) marcarToque(false);
     });
   }

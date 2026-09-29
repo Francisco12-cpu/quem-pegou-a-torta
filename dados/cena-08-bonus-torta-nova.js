@@ -9,7 +9,7 @@ var CENA_08_BONUS_TORTA_NOVA = {
     { quemFala: "protagonista", texto: "Na verdade, Applejack... espera um pouco." },
     {
       quemFala: "narrador",
-      texto: "A protagonista mostra farinha, maçã, canela e mel, juntados durante toda a investigação.",
+      texto: "{nome} mostra farinha, maçã, canela e mel, juntados durante toda a investigação.",
     },
     { quemFala: "pinkie", lado: "esquerda", texto: "Você guardou tudo isso?!" },
     {

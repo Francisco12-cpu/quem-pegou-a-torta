@@ -217,6 +217,23 @@
       <div class="especial-dica">Toque para continuar</div>
     </div>
 
+    <!-- ===== escolha do nome (depois da abertura) ===== -->
+    <div id="tela-nome" class="tela" hidden>
+      <div class="tela-fundo fundo-praca-ponyville"></div>
+      <div class="tela-veu escuro"></div>
+      <form id="nome-form" class="painel nome-painel" autocomplete="off" novalidate>
+        <div class="nome-retrato" id="nome-retrato"></div>
+        <label class="painel-titulo nome-titulo" for="nome-campo">Escolha seu nome</label>
+        <div class="nome-linha">
+          <input id="nome-campo" type="text" inputmode="text" autocomplete="off" autocorrect="off"
+            autocapitalize="words" spellcheck="false" enterkeyhint="done" />
+          <span id="nome-contador" aria-live="polite"></span>
+        </div>
+        <p id="nome-aviso" role="alert" hidden></p>
+        <button id="nome-confirmar" class="botao principal" type="submit">Confirmar</button>
+      </form>
+    </div>
+
     <!-- ===== abertura: libera o áudio no primeiro toque/tecla ===== -->
     <div id="tela-abertura" class="tela">
       <div class="abertura-logo">
@@ -249,6 +266,7 @@
   <script src="dados/config.js"></script>
 
   <!-- motor (lógica) -->
+  <script src="js/vendor/profanity-br.js"></script>
   <script src="js/estado.js"></script>
   <script src="js/visual-personagem.js"></script>
   <script src="js/responsivo.js"></script>
@@ -258,6 +276,7 @@
   <script src="js/engine-minigame.js"></script>
   <script src="js/engine-exploracao.js"></script>
   <script src="js/cena-especial.js"></script>
+  <script src="js/nome.js"></script>
   <script src="js/telas.js"></script>
   <script src="js/main.js"></script>
 </body>

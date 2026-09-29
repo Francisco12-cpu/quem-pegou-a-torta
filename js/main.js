@@ -10,7 +10,9 @@ document.addEventListener("DOMContentLoaded", function () {
   Interface.iniciar();
   Telas.abrirMenu(comecarJogo); // o menu já fica pronto por baixo da tela de abertura
   Telas.abrirAbertura(function () {
-    CenaEspecial.mostrar("carregamento", function () {});
+    Telas.abrirNome(function () {
+      CenaEspecial.mostrar("carregamento", function () {});
+    });
   });
 });
 

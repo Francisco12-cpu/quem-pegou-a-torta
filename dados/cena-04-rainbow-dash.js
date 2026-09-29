@@ -6,7 +6,7 @@ var CENA_04_RAINBOW_DASH = {
   falas: [
     {
       quemFala: "narrador",
-      texto: "Uma música alta ecoa antes da porta se abrir — e diminui assim que a protagonista entra.",
+      texto: "Uma música alta ecoa antes da porta se abrir — e diminui assim que {nome} entra.",
     },
     { quemFala: "rainbow-dash", lado: "esquerda", texto: "Hã? Pinkie? O que vocês estão fazendo aqui?" },
     { quemFala: "pinkie", lado: "direita", texto: "A TORTA SUMIU!" },

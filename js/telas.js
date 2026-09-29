@@ -281,6 +281,79 @@ var Telas = (function () {
     tela.addEventListener("touchend", iniciar);
   }
 
+  // ---- escolha do nome da protagonista ----
+  // O nome vale pra sessão toda: vira o nome dela nos diálogos (PERSONAGENS.protagonista.nome)
+  // e o {nome} das falas do narrador. Não é cadastro — nada é salvo além da aba aberta.
+
+  function abrirNome(aoConfirmar) {
+    var tela = $("tela-nome");
+    var form = $("nome-form");
+    var campo = $("nome-campo");
+    var aviso = $("nome-aviso");
+    var contador = $("nome-contador");
+    var enviando = false;
+
+    Nome.carregar();
+    campo.maxLength = Nome.limite();
+    $("nome-retrato").innerHTML = htmlVisualPersonagem(PERSONAGENS.protagonista);
+    try {
+      campo.value = window.sessionStorage.getItem("torta-nome") || "";
+    } catch (e) {}
+
+    function atualizarContador() {
+      contador.textContent = Array.from(campo.value).length + "/" + Nome.limite();
+    }
+
+    function mostrarAviso(texto) {
+      aviso.textContent = texto;
+      aviso.hidden = false;
+      form.classList.remove("recusado");
+      void form.offsetWidth;
+      form.classList.add("recusado");
+      Musica.efeito("trancado");
+    }
+
+    campo.oninput = function () {
+      aviso.hidden = true;
+      atualizarContador();
+    };
+
+    form.onsubmit = function (e) {
+      e.preventDefault();
+      if (enviando) return;
+      Nome.carregar().then(function () {
+        var resultado = Nome.validar(campo.value);
+        if (!resultado.ok) {
+          mostrarAviso(resultado.mensagem);
+          campo.focus();
+          return;
+        }
+        enviando = true;
+        estado.nomeJogador = resultado.nome;
+        PERSONAGENS.protagonista.nome = resultado.nome;
+        try {
+          window.sessionStorage.setItem("torta-nome", resultado.nome);
+        } catch (erro) {}
+        Musica.efeito("interagir");
+        campo.blur(); // fecha o teclado do celular
+        Interface.transicao(function () {
+          tela.hidden = true;
+          aoConfirmar();
+        });
+      });
+    };
+
+    atualizarContador();
+    aviso.hidden = true;
+    tela.hidden = false;
+    // no computador já deixa pronto pra digitar; no celular o teclado abre ao tocar no campo
+    if (!document.body.classList.contains("toque")) {
+      setTimeout(function () {
+        campo.focus();
+      }, 80);
+    }
+  }
+
   // ---- menu ----
 
   function abrirMenu(aoJogar) {
@@ -469,6 +542,7 @@ var Telas = (function () {
 
   return {
     abrirAbertura: abrirAbertura,
+    abrirNome: abrirNome,
     abrirMenu: abrirMenu,
     abrirCaso: abrirCaso,
     abrirFim: abrirFim,
