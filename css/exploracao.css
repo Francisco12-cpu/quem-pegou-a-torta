@@ -1,0 +1,413 @@
+/* exploracao.css — o mapa em plataforma 2D: cena 16:9 ocupando a largura toda (o JS calcula o
+   tamanho), protagonista e pôneis de pé na linha do chão, balão de interação, setas das bordas
+   e controles de toque. */
+
+#exploracao-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  overflow: hidden;
+  background: var(--roxo-noite);
+  touch-action: none;
+}
+
+/* quando a tela é mais alta que 16:9 (celular em pé), o resto é o próprio cenário desfocado */
+#exploracao-fundo-desfocado {
+  position: absolute;
+  inset: -40px;
+  filter: blur(18px) brightness(0.55) saturate(1.1);
+}
+
+#exploracao-cena {
+  position: absolute;
+  left: 0;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+}
+
+#exploracao-chao {
+  position: absolute;
+  inset: 0;
+}
+
+#exploracao-pontos {
+  position: absolute;
+  inset: 0;
+}
+
+/* ---- atores: protagonista, acompanhante e pôneis ---- */
+/* O elemento fica com o "pé" no ponto (left = x, top = chão); a altura vem da escala da tela
+   (em % da altura da cena) e o sprite ocupa essa altura toda. */
+
+.ator,
+.ponto {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  pointer-events: none;
+}
+
+.ator {
+  z-index: 5;
+}
+
+#exploracao-acompanhante {
+  z-index: 4;
+}
+
+.ator-corpo {
+  height: 100%;
+  transform: translateY(var(--pulo, 0)) rotate(var(--giro, 0));
+  transform-origin: 50% 100%;
+}
+
+.ator-corpo .sprite-personagem {
+  height: 100%;
+  width: auto;
+  display: block;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 4px 5px rgba(0, 0, 0, 0.4));
+  -webkit-user-drag: none;
+}
+
+.ator-corpo .bloco-cor {
+  height: 100%;
+  aspect-ratio: 0.8;
+  border-radius: 8px;
+}
+
+/* sprites olham pra esquerda por padrão; olhando pra direita = espelhado */
+.olhando-direita .ator-corpo .sprite-personagem {
+  transform: scaleX(-1);
+}
+
+/* parada: respira de leve */
+.ator:not(.andando) .ator-corpo,
+.ponto-ponei .ator-corpo {
+  animation: ator-respira 2.6s ease-in-out infinite;
+}
+
+@keyframes ator-respira {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(1.025);
+  }
+}
+
+/* ---- pontos de interação ---- */
+
+.ponto {
+  z-index: 3;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.ponto.camada-frente {
+  z-index: 7;
+  transition: opacity 0.2s ease;
+}
+
+/* camada da frente fica translúcida quando a protagonista passa por trás */
+.ponto.camada-frente.sobreposto {
+  opacity: 0.55;
+}
+
+.ponto-nome {
+  position: absolute;
+  bottom: 100%;
+  margin-bottom: 0.3em;
+  font-family: var(--fonte-titulo);
+  font-size: 0.72em;
+  padding: 0.1em 0.55em;
+  border-radius: 5px;
+  background: rgba(26, 16, 48, 0.75);
+  white-space: nowrap;
+  opacity: 0.85;
+  transition: opacity 0.2s ease;
+}
+
+.ponto.perto .ponto-nome {
+  opacity: 0;
+}
+
+.ponto-bau img {
+  height: 100%;
+  width: auto;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.45));
+}
+
+.ponto-bau {
+  animation: bau-balanca 3s ease-in-out infinite;
+}
+
+@keyframes bau-balanca {
+  0%,
+  88%,
+  100% {
+    transform: translate(-50%, -100%) rotate(0);
+  }
+  92% {
+    transform: translate(-50%, -100%) rotate(-4deg);
+  }
+  96% {
+    transform: translate(-50%, -100%) rotate(4deg);
+  }
+}
+
+/* perto o bastante: brilho em volta */
+.ponto.perto .sprite-personagem,
+.ponto.perto img {
+  filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 10px rgba(255, 212, 121, 0.95));
+}
+
+/* ---- balão "Conversar / Abrir baú" ---- */
+
+#exploracao-balao {
+  position: absolute;
+  z-index: 8;
+  transform: translate(-50%, -100%);
+  padding: 0.35em 0.8em;
+  border-radius: 8px;
+  background: var(--creme);
+  color: var(--roxo-noite);
+  font-family: var(--fonte-titulo);
+  font-weight: 700;
+  font-size: 0.95em;
+  white-space: nowrap;
+  box-shadow: 0 0 0 3px var(--roxo-noite), 0 6px 14px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+}
+
+#exploracao-balao::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  margin-left: -7px;
+  border: 7px solid transparent;
+  border-top-color: var(--roxo-noite);
+}
+
+#exploracao-balao kbd {
+  margin-right: 0.45em;
+  background: var(--rosa);
+  color: #fff;
+  box-shadow: 0 3px 0 var(--rosa-escuro);
+}
+
+#exploracao-balao.aparecendo {
+  animation: balao-aparece 0.3s cubic-bezier(0.2, 1.5, 0.4, 1), balao-flutua 1.6s ease-in-out 0.3s infinite;
+}
+
+@keyframes balao-aparece {
+  from {
+    transform: translate(-50%, -60%) scale(0.5);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, -100%) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes balao-flutua {
+  0%,
+  100% {
+    transform: translate(-50%, -100%);
+  }
+  50% {
+    transform: translate(-50%, calc(-100% - 4px));
+  }
+}
+
+/* ---- aviso (borda trancada) ---- */
+
+#exploracao-aviso {
+  position: absolute;
+  z-index: 9;
+  left: 50%;
+  top: 16%;
+  transform: translateX(-50%);
+  max-width: min(560px, 86%);
+  padding: 0.6em 1.1em;
+  border-radius: 10px;
+  background: rgba(26, 16, 48, 0.92);
+  box-shadow: 0 0 0 2px var(--rosa);
+  text-align: center;
+  line-height: 1.35;
+  pointer-events: none;
+}
+
+#exploracao-aviso.aparecendo {
+  animation: aviso-aparece 0.3s ease;
+}
+
+@keyframes aviso-aparece {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%);
+  }
+}
+
+/* ---- setas das bordas (pra onde dá pra ir) ---- */
+
+.seta-borda {
+  position: absolute;
+  z-index: 6;
+  top: calc(var(--chao) - 18%);
+  width: 2.4em;
+  height: 2.4em;
+  color: var(--creme);
+  pointer-events: none;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.6));
+}
+
+.seta-borda::before {
+  content: "";
+  position: absolute;
+  inset: 25%;
+  border-top: 0.35em solid currentColor;
+  border-right: 0.35em solid currentColor;
+  border-radius: 2px;
+}
+
+.seta-borda.direita {
+  right: 0.6em;
+  animation: seta-direita 1.1s ease-in-out infinite;
+}
+
+.seta-borda.direita::before {
+  transform: rotate(45deg);
+}
+
+.seta-borda.esquerda {
+  left: 0.6em;
+  animation: seta-esquerda 1.1s ease-in-out infinite;
+  opacity: 0.55;
+}
+
+.seta-borda.esquerda::before {
+  transform: rotate(-135deg);
+}
+
+@keyframes seta-direita {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(6px);
+  }
+}
+
+@keyframes seta-esquerda {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-6px);
+  }
+}
+
+/* ---- dica de teclado (computador) ---- */
+
+#dica-teclado {
+  position: absolute;
+  z-index: 12;
+  left: 50%;
+  top: max(12px, env(safe-area-inset-top, 0px));
+  transform: translateX(-50%);
+  padding: 0.35em 0.9em;
+  border-radius: 999px;
+  background: rgba(26, 16, 48, 0.72);
+  font-size: 0.8em;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+body.toque #dica-teclado,
+body.toque .so-teclado {
+  display: none;
+}
+
+/* ---- controles de toque (celular / tablet) ---- */
+
+#controles-toque {
+  display: none;
+}
+
+body.toque #controles-toque {
+  display: flex;
+  position: absolute;
+  z-index: 12;
+  left: 0;
+  right: 0;
+  bottom: calc(12px + var(--margem-segura-baixo));
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 0 max(14px, env(safe-area-inset-left, 0px)) 0 max(14px, env(safe-area-inset-right, 0px));
+  pointer-events: none;
+}
+
+.botao-toque {
+  pointer-events: auto;
+  width: clamp(64px, 17vmin, 96px);
+  height: clamp(64px, 17vmin, 96px);
+  border-radius: 50%;
+  background: rgba(26, 16, 48, 0.62);
+  box-shadow: 0 0 0 3px rgba(255, 212, 121, 0.7), 0 6px 14px rgba(0, 0, 0, 0.35);
+  color: var(--creme);
+  font-size: clamp(22px, 6vmin, 34px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: none;
+  -webkit-touch-callout: none;
+  transition: transform 0.08s ease, background 0.1s ease;
+}
+
+.botao-toque.pressionado {
+  transform: scale(0.92);
+  background: rgba(255, 111, 176, 0.75);
+}
+
+.botao-toque.acao {
+  width: auto;
+  height: auto;
+  min-height: 52px;
+  border-radius: 12px;
+  padding: 0.4em 1.2em;
+  align-self: center;
+  margin-bottom: 0.4em;
+  background: linear-gradient(180deg, #ff9ccd 0%, var(--rosa) 45%, var(--rosa-escuro) 100%);
+  box-shadow: 0 0 0 3px var(--roxo-noite), 0 5px 0 3px #7a1f4d;
+  font-family: var(--fonte-titulo);
+  font-weight: 700;
+  font-size: 1.15em;
+  color: #fff;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
+  animation: acao-pulsa 1.2s ease-in-out infinite;
+}
+
+@keyframes acao-pulsa {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+}

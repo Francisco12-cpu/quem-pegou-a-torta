@@ -1,0 +1,412 @@
+/* dialogo.css — caixa de texto, personagens no palco, opções, cartão de item */
+
+/* ---- Personagens ---- */
+
+.personagem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3em;
+  transition: opacity 0.25s ease, filter 0.25s ease, transform 0.25s ease;
+}
+
+.personagem .bloco-cor {
+  width: clamp(48px, min(16vw, 24vh), 140px);
+  height: clamp(70px, min(22vw, 32vh), 200px);
+  border-radius: 10px;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
+}
+
+/* sprite pixel art: altura fixa, largura proporcional, sem borrar os pixels */
+.personagem .sprite-personagem {
+  display: block;
+  height: clamp(96px, min(34vw, 46vh), 340px); /* min(): celular deitado tem pouca altura */
+  width: auto;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.35));
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* todos os sprites originais olham pra esquerda — quem está no lado esquerdo do palco é
+   espelhado pra olhar pro centro (pra quem está conversando com ela) */
+#personagem-esquerda .sprite-personagem {
+  transform: scaleX(-1);
+}
+
+.personagem .nome-personagem {
+  font-family: var(--fonte-titulo);
+  font-weight: 700;
+  font-size: 0.8em;
+  padding: 0.15em 0.7em;
+  border-radius: 6px;
+  background: rgba(26, 16, 48, 0.8);
+  box-shadow: 0 0 0 2px rgba(255, 212, 121, 0.35);
+  white-space: nowrap;
+}
+
+/* A protagonista tem espaço fixo próprio (sempre visível, nunca some — ver ARQUITETURA.md);
+   um leve destaque (levemente maior, mais à frente) deixa claro que ela não é "mais uma
+   pônei" no palco. */
+#personagem-protagonista {
+  z-index: 1;
+  transform: scale(1.04);
+}
+
+.personagem.falando {
+  opacity: 1;
+  filter: none;
+}
+
+.personagem.falando .bloco-cor,
+.personagem.falando .sprite-personagem {
+  animation: personagem-respira 1.8s ease-in-out infinite;
+}
+
+.personagem.falando .nome-personagem {
+  background: var(--roxo-noite);
+  box-shadow: 0 0 0 2px var(--dourado);
+  color: var(--dourado);
+}
+
+.personagem.escurecido {
+  opacity: 0.6;
+  filter: grayscale(35%) brightness(0.62);
+}
+
+.personagem.entrando .sprite-personagem,
+.personagem.entrando .bloco-cor {
+  animation: personagem-entra 0.35s cubic-bezier(0.2, 1.3, 0.4, 1);
+}
+
+#personagem-esquerda.entrando .sprite-personagem {
+  animation-name: personagem-entra-espelhado;
+}
+
+#personagem-esquerda.falando .sprite-personagem {
+  animation-name: personagem-respira-espelhado;
+}
+
+@keyframes personagem-respira-espelhado {
+  0%,
+  100% {
+    transform: scaleX(-1) translateY(0) scaleY(1);
+  }
+  50% {
+    transform: scaleX(-1) translateY(-3%) scaleY(1.015);
+  }
+}
+
+@keyframes personagem-respira {
+  0%,
+  100% {
+    transform: translateY(0) scaleY(1);
+  }
+  50% {
+    transform: translateY(-3%) scaleY(1.015);
+  }
+}
+
+@keyframes personagem-entra {
+  from {
+    transform: translateY(12%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes personagem-entra-espelhado {
+  from {
+    transform: scaleX(-1) translateY(12%);
+    opacity: 0;
+  }
+  to {
+    transform: scaleX(-1) translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ---- Caixa de diálogo: painel do jogo, flutuando embaixo ---- */
+
+#caixa-dialogo {
+  position: absolute;
+  left: 50%;
+  bottom: calc(10px + var(--margem-segura-baixo));
+  transform: translateX(-50%);
+  width: min(1100px, calc(100% - 24px));
+  height: var(--altura-caixa-dialogo);
+  z-index: 2;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(61, 39, 102, 0.96) 0%, rgba(34, 21, 60, 0.97) 100%);
+  box-shadow: var(--moldura);
+  cursor: pointer;
+}
+
+#caixa-dialogo-conteudo {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45em;
+  padding: 1.2em 1.4em 1em;
+}
+
+/* etiqueta com o nome de quem fala, "presa" na borda de cima da caixa */
+#nome-falante {
+  position: absolute;
+  top: 0;
+  left: 1.1em;
+  transform: translateY(-62%);
+  font-family: var(--fonte-titulo);
+  font-weight: 700;
+  font-size: 1.05em;
+  padding: 0.18em 0.9em;
+  border-radius: 7px;
+  background: var(--cor-falante, var(--dourado));
+  color: var(--roxo-noite);
+  box-shadow: 0 0 0 3px var(--roxo-noite), 0 4px 0 3px rgba(0, 0, 0, 0.35);
+  white-space: nowrap;
+}
+
+#texto-fala {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  line-height: 1.5;
+  font-size: 1.12em;
+}
+
+#texto-fala.aparecendo {
+  animation: texto-aparece 0.25s ease;
+}
+
+@keyframes texto-aparece {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Falas de narrador: sem nome, texto em itálico e centralizado */
+#caixa-dialogo.narracao #texto-fala {
+  font-style: italic;
+  text-align: center;
+  color: var(--texto-suave);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* setinha piscando: "clique pra continuar" */
+#dica-avancar {
+  position: absolute;
+  right: 1.1em;
+  bottom: 0.8em;
+  width: 0;
+  height: 0;
+  border-left: 0.5em solid transparent;
+  border-right: 0.5em solid transparent;
+  border-top: 0.6em solid var(--dourado);
+  animation: dica-pisca 0.9s ease-in-out infinite;
+}
+
+#caixa-dialogo.escolhendo #dica-avancar {
+  display: none;
+}
+
+@keyframes dica-pisca {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(4px);
+    opacity: 0.5;
+  }
+}
+
+/* com opções na tela, a caixa cresce pra caber os botões */
+#caixa-dialogo.escolhendo {
+  height: auto;
+  min-height: var(--altura-caixa-dialogo);
+  cursor: default;
+}
+
+/* ---- Barra de tempo das escolhas ---- */
+
+#barra-tempo {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.35);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+
+#barra-tempo .preenchimento {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, var(--rosa), var(--dourado));
+  border-radius: 4px;
+}
+
+/* ---- Opções ---- */
+
+#area-opcoes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16em), 1fr));
+  gap: 0.55em;
+}
+
+.opcao {
+  text-align: left;
+  padding: 0.6em 0.9em 0.6em 1.9em;
+  border-radius: 8px;
+  background: rgba(26, 16, 48, 0.75);
+  box-shadow: 0 0 0 2px rgba(255, 212, 121, 0.4);
+  position: relative;
+  line-height: 1.3;
+  animation: opcao-aparece 0.3s ease backwards;
+  transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+}
+
+.opcao::before {
+  content: "";
+  position: absolute;
+  left: 0.8em;
+  top: 50%;
+  width: 0.45em;
+  height: 0.45em;
+  background: var(--dourado);
+  transform: translateY(-50%) rotate(45deg);
+  border-radius: 1px;
+}
+
+.opcao:hover,
+.opcao:focus-visible {
+  background: var(--roxo-claro);
+  box-shadow: 0 0 0 2px var(--dourado);
+  outline: none;
+}
+
+.opcao:active {
+  transform: scale(0.98);
+}
+
+@keyframes opcao-aparece {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---- Cartão de item (ex.: a torta) ---- */
+
+#cartao-item {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  z-index: 3;
+  transform: translate(-50%, -50%);
+  width: min(320px, 70vw);
+  padding: 1.1em 1.2em 1.2em;
+  border-radius: 12px;
+  background: linear-gradient(180deg, var(--creme) 0%, #f6dfb8 100%);
+  color: var(--roxo-noite);
+  text-align: center;
+  box-shadow: 0 0 0 3px var(--roxo-noite), 0 0 0 6px var(--dourado), 0 0 0 9px var(--roxo-noite),
+    0 18px 40px rgba(0, 0, 0, 0.55);
+  pointer-events: none;
+}
+
+#cartao-item.aparecendo {
+  animation: cartao-aparece 0.5s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+.cartao-item-brilho {
+  position: absolute;
+  left: 50%;
+  top: 34%;
+  width: 70%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(255, 212, 121, 0.9), transparent 65%);
+  animation: brilho-gira 6s linear infinite;
+}
+
+#cartao-item-imagem {
+  position: relative;
+  width: 70%;
+  margin: 0 auto 0.5em;
+  image-rendering: pixelated;
+  animation: flutua 2.4s ease-in-out infinite;
+}
+
+#cartao-item-nome {
+  position: relative;
+  font-family: var(--fonte-titulo);
+  font-weight: 700;
+  font-size: 1.15em;
+  color: var(--rosa-escuro);
+  margin-bottom: 0.3em;
+}
+
+#cartao-item-descricao {
+  position: relative;
+  font-size: 0.9em;
+  line-height: 1.4;
+}
+
+@keyframes cartao-aparece {
+  from {
+    transform: translate(-50%, -30%) scale(0.6);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes brilho-gira {
+  from {
+    transform: translate(-50%, -50%) rotate(0);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@keyframes flutua {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+/* celular deitado: cartão menor, pra não cobrir a caixa */
+@media (max-height: 480px) {
+  #cartao-item {
+    width: min(230px, 50vw);
+    top: 36%;
+    padding: 0.6em 0.8em 0.8em;
+  }
+  #cartao-item-imagem {
+    width: 50%;
+  }
+}

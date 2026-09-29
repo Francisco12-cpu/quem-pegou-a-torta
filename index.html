@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="description" content="Um joguinho de investigação em Ponyville: descubra quem pegou a torta da festa surpresa da Applejack." />
+  <meta name="theme-color" content="#1a1030" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Quem Pegou a Torta?</title>
+  <link rel="icon" type="image/png" href="assets/itens/torta.png" />
+
+  <link rel="stylesheet" href="css/reset.css" />
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/dialogo.css" />
+  <link rel="stylesheet" href="css/cenarios.css" />
+  <link rel="stylesheet" href="css/exploracao.css" />
+  <link rel="stylesheet" href="css/minigame.css" />
+  <link rel="stylesheet" href="css/telas.css" />
+</head>
+<body>
+  <div id="jogo">
+    <!-- ===== cena de diálogo ===== -->
+    <div id="cenario"></div>
+
+    <div id="palco">
+      <div id="personagem-esquerda" class="personagem"></div>
+      <div id="personagem-protagonista" class="personagem"></div>
+      <div id="personagem-direita" class="personagem"></div>
+    </div>
+
+    <div id="cartao-item" hidden>
+      <div class="cartao-item-brilho"></div>
+      <img id="cartao-item-imagem" alt="" />
+      <div id="cartao-item-nome"></div>
+      <div id="cartao-item-descricao"></div>
+    </div>
+
+    <div id="caixa-dialogo">
+      <div id="caixa-dialogo-conteudo">
+        <div id="nome-falante"></div>
+        <div id="texto-fala"></div>
+        <div id="barra-tempo"></div>
+        <div id="area-opcoes"></div>
+        <div id="dica-avancar" aria-hidden="true"></div>
+      </div>
+    </div>
+
+    <!-- ===== exploração (plataforma 2D) ===== -->
+    <div id="exploracao-overlay" hidden>
+      <div id="exploracao-fundo-desfocado"></div>
+      <div id="exploracao-cena">
+        <div id="exploracao-chao"></div>
+        <div id="exploracao-pontos"></div>
+        <div id="exploracao-acompanhante" class="ator" hidden></div>
+        <div id="exploracao-protagonista" class="ator"></div>
+        <div id="exploracao-balao" hidden></div>
+        <div id="exploracao-aviso" hidden></div>
+        <div id="exploracao-seta-direita" class="seta-borda direita" hidden></div>
+        <div id="exploracao-seta-esquerda" class="seta-borda esquerda" hidden></div>
+      </div>
+      <div id="controles-toque">
+        <button id="toque-esquerda" class="botao-toque" type="button" aria-label="Andar para a esquerda"><span class="chevron esquerda"></span></button>
+        <button id="toque-acao" class="botao-toque acao" type="button" hidden>Interagir</button>
+        <button id="toque-direita" class="botao-toque" type="button" aria-label="Andar para a direita"><span class="chevron direita"></span></button>
+      </div>
+      <div id="dica-teclado"><kbd>A</kbd><kbd>D</kbd> ou setas para andar <span class="separador"></span> <kbd>E</kbd> para interagir</div>
+    </div>
+
+    <!-- ===== baú (minigame) ===== -->
+    <div id="minigame-overlay" hidden></div>
+
+    <!-- ===== HUD ===== -->
+    <div id="hud" hidden>
+      <div id="contador-ingredientes"></div>
+      <div id="hud-botoes">
+        <button id="botao-log" class="botao-hud" type="button">Histórico</button>
+        <button id="botao-som" class="botao-hud icone" type="button" aria-label="Ligar ou desligar o som">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path class="alto-falante" d="M4 9h4l5-4v14l-5-4H4z" /><path class="ondas" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" /><path class="risco" d="M16 9l6 6M22 9l-6 6" /></svg>
+        </button>
+        <button id="botao-tela-cheia" class="botao-hud icone" type="button" aria-label="Tela cheia">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" /></svg>
+        </button>
+      </div>
+    </div>
+    <div id="painel-log" hidden>
+      <div id="painel-log-cabecalho">
+        <span>Histórico da conversa</span>
+        <button id="painel-log-fechar" class="botao secundario pequeno" type="button">Fechar</button>
+      </div>
+      <div id="painel-log-lista"></div>
+    </div>
+
+    <div id="placa-local" hidden></div>
+    <div id="voo-camada"></div>
+
+    <!-- ===== menu ===== -->
+    <div id="tela-menu" class="tela">
+      <div class="tela-fundo fundo-praca-ponyville"></div>
+      <div class="tela-veu"></div>
+      <div class="brilhos" aria-hidden="true"></div>
+      <div class="menu-conteudo">
+        <div class="menu-sobretitulo">Um mistério em Ponyville</div>
+        <h1 class="menu-titulo"><span>Quem Pegou</span><span>a Torta?</span></h1>
+        <div class="menu-torta"><img src="assets/itens/torta.png" alt="" /></div>
+        <div class="menu-botoes">
+          <button id="menu-jogar" class="botao principal" type="button">Jogar</button>
+          <button id="menu-como-jogar" class="botao secundario" type="button">Como jogar</button>
+          <button id="menu-creditos" class="botao secundario" type="button">Créditos</button>
+        </div>
+      </div>
+      <div class="desfile-poneis" aria-hidden="true"></div>
+      <div id="menu-rodape"></div>
+    </div>
+
+    <div id="tela-como-jogar" class="tela modal" hidden>
+      <div class="painel">
+        <h2 class="painel-titulo">Como jogar</h2>
+        <p class="como-objetivo">A torta da festa surpresa da Applejack sumiu! Ande por Ponyville, converse com as pôneis e junte as pistas para descobrir quem pegou.</p>
+        <div class="como-colunas">
+          <div class="como-coluna">
+            <h3>No computador</h3>
+            <ul>
+              <li><kbd>A</kbd><kbd>D</kbd> ou setas: andar</li>
+              <li><kbd>E</kbd>, <kbd>Enter</kbd> ou <kbd>Espaço</kbd>: conversar, abrir baús e avançar o diálogo</li>
+              <li>Clique no cenário para andar até lá</li>
+            </ul>
+          </div>
+          <div class="como-coluna">
+            <h3>No celular</h3>
+            <ul>
+              <li>Segure os botões das pontas para andar</li>
+              <li>Toque no cenário para andar até lá</li>
+              <li>Use o botão do meio para interagir</li>
+            </ul>
+          </div>
+        </div>
+        <p class="como-dica"><img src="assets/itens/bau-fechado.png" alt="" /> Algumas casas escondem baús com ingredientes. Junte os quatro para um final especial.</p>
+        <button id="como-jogar-fechar" class="botao principal" type="button">Entendi</button>
+      </div>
+    </div>
+
+    <!-- ===== caso resolvido ===== -->
+    <div id="tela-caso" class="tela" hidden>
+      <div class="tela-fundo fundo-celeiro-applejack"></div>
+      <div class="tela-veu escuro"></div>
+      <div class="caso-conteudo">
+        <div class="caso-suspeita">
+          <div class="holofote"></div>
+          <img id="caso-sprite" alt="" />
+          <div id="caso-nome"></div>
+        </div>
+        <div class="painel caso-ficha">
+          <div class="caso-carimbo" id="caso-carimbo"></div>
+          <div class="caso-rotulo">Quem pegou a torta?</div>
+          <div class="caso-culpada" id="caso-culpada"></div>
+          <blockquote id="caso-frase"></blockquote>
+          <p id="caso-motivo"></p>
+          <div id="caso-acusacao"></div>
+          <div class="caso-rotulo">Pistas investigadas</div>
+          <ul id="caso-pistas"></ul>
+          <button id="caso-continuar" class="botao principal" type="button">Continuar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== final ===== -->
+    <div id="tela-fim" class="tela" hidden>
+      <div class="tela-fundo fundo-festa-decorada"></div>
+      <div class="tela-veu"></div>
+      <div class="confete" aria-hidden="true"></div>
+      <div class="fim-conteudo">
+        <div id="tela-fim-selo" hidden></div>
+        <h2 id="tela-fim-titulo"></h2>
+        <p id="tela-fim-texto"></p>
+        <div class="fim-torta"><img src="assets/itens/torta.png" alt="" /></div>
+        <div class="fim-estatisticas">
+          <div class="estatistica"><span>Ingredientes</span><div id="fim-ingredientes"></div></div>
+          <div class="estatistica"><span>Pistas</span><b id="fim-pistas"></b></div>
+          <div class="estatistica"><span>Tempo</span><b id="fim-tempo"></b></div>
+        </div>
+        <div class="fim-botoes">
+          <button id="fim-creditos" class="botao principal" type="button">Ver créditos</button>
+          <button id="fim-jogar-de-novo" class="botao secundario" type="button">Jogar de novo</button>
+        </div>
+      </div>
+      <div class="desfile-poneis" aria-hidden="true"></div>
+    </div>
+
+    <!-- ===== créditos ===== -->
+    <div id="tela-creditos" class="tela" hidden>
+      <div class="tela-fundo fundo-festa-decorada"></div>
+      <div class="tela-veu escuro"></div>
+      <div class="creditos-rolagem">
+        <div class="creditos-conteudo">
+          <h2 id="creditos-titulo"></h2>
+          <div id="creditos-subtitulo"></div>
+          <div id="creditos-pessoas"></div>
+          <p id="creditos-dica" class="creditos-dica"></p>
+          <div id="creditos-redes"></div>
+          <div id="creditos-notas"></div>
+          <div class="creditos-botoes">
+            <button id="creditos-voltar" class="botao principal" type="button">Voltar ao menu</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== cena especial (GIF/vídeo da chuva de estrelas — ver dados/config.js) ===== -->
+    <div id="tela-especial" class="tela" hidden>
+      <div id="especial-midia"></div>
+      <div class="especial-legenda">
+        <div id="especial-titulo"></div>
+        <div id="especial-texto"></div>
+      </div>
+      <div class="especial-dica">Toque para continuar</div>
+    </div>
+
+    <!-- ===== abertura: libera o áudio no primeiro toque/tecla ===== -->
+    <div id="tela-abertura" class="tela">
+      <div class="abertura-logo">
+        <img class="abertura-torta" src="assets/itens/torta.png" alt="" />
+        <div class="abertura-titulo"><span>Quem Pegou</span><span>a Torta?</span></div>
+      </div>
+      <div class="abertura-aperte">Aperte qualquer botão para iniciar</div>
+    </div>
+
+    <div id="transicao"></div>
+  </div>
+
+  <div id="aviso-rotacao" hidden>Gire o celular para ver melhor</div>
+
+  <!-- dados (conteúdo) — carregados antes do motor -->
+  <script src="dados/personagens.js"></script>
+  <script src="dados/cena-01-confeitaria.js"></script>
+  <script src="dados/cena-02-twilight.js"></script>
+  <script src="dados/cena-03-rarity.js"></script>
+  <script src="dados/cena-04-rainbow-dash.js"></script>
+  <script src="dados/cena-05-fluttershy.js"></script>
+  <script src="dados/cena-06-confronto.js"></script>
+  <script src="dados/cena-07-revelacao.js"></script>
+  <script src="dados/cena-08-bonus-torta-nova.js"></script>
+  <script src="dados/baus.js"></script>
+  <script src="dados/itens.js"></script>
+  <script src="dados/casas.js"></script>
+  <script src="dados/final.js"></script>
+  <script src="dados/musicas.js"></script>
+  <script src="dados/config.js"></script>
+
+  <!-- motor (lógica) -->
+  <script src="js/estado.js"></script>
+  <script src="js/visual-personagem.js"></script>
+  <script src="js/responsivo.js"></script>
+  <script src="js/musica.js"></script>
+  <script src="js/interface.js"></script>
+  <script src="js/engine-dialogo.js"></script>
+  <script src="js/engine-minigame.js"></script>
+  <script src="js/engine-exploracao.js"></script>
+  <script src="js/cena-especial.js"></script>
+  <script src="js/telas.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

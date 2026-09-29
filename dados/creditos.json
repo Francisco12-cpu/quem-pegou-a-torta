@@ -1,0 +1,48 @@
+{
+  "_como_editar": "Cada item de 'secoes' vira um cartão nos créditos: 'titulo' é a função e 'pessoas' os nomes. 'mensagem' é opcional: escreva normal, o jogo mostra cifrada (cifra de César) e decifra com animação quando alguém toca no nome. 'deslocamento' é quantas letras cada letra anda no alfabeto. Em 'redes', 'texto' é o que aparece e 'endereco' é para onde o link leva. Este campo é ignorado pelo jogo.",
+  "titulo": "Quem Pegou a Torta?",
+  "subtitulo": "Feira de Ciências de Informática",
+  "cifra": {
+    "tipo": "cesar",
+    "deslocamento": 3
+  },
+  "secoes": [
+    {
+      "titulo": "Programação e desenvolvimento",
+      "pessoas": [
+        { "nome": "Francisco Audir", "mensagem": "Obrigado por jogar até o fim!" }
+      ]
+    },
+    {
+      "titulo": "Game design e efeitos sonoros",
+      "pessoas": [
+        { "nome": "Lucas" },
+        { "nome": "Ana Luiza" }
+      ]
+    },
+    {
+      "titulo": "Apoio na definição e revisão do game design",
+      "pessoas": [
+        { "nome": "Maju" }
+      ]
+    },
+    {
+      "titulo": "Agradecimentos especiais",
+      "pessoas": [
+        { "nome": "Matheus" }
+      ]
+    }
+  ],
+  "redes": [
+    {
+      "tipo": "instagram",
+      "texto": "@filho.af",
+      "endereco": "https://www.instagram.com/filho.af/",
+      "legenda": "Instagram do desenvolvedor"
+    }
+  ],
+  "notas": [
+    "Personagens de My Little Pony: A Amizade é Mágica pertencem à Hasbro.",
+    "Projeto escolar feito por fãs, sem fins lucrativos."
+  ]
+}

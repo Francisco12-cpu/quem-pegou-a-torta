@@ -1,0 +1,504 @@
+/* main.css — base visual do jogo inteiro: paleta, fontes, layout em tela cheia, HUD,
+   painéis, botões e transição. Todas as outras folhas usam estas variáveis, pra tudo parecer
+   parte do mesmo jogo. */
+
+/* fontes locais (assets/fontes) — funcionam sem internet */
+@font-face {
+  font-family: "Fredoka";
+  src: url("../assets/fontes/fredoka.woff2") format("woff2");
+  font-weight: 300 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Pixelify Sans";
+  src: url("../assets/fontes/pixelify-sans.woff2") format("woff2");
+  font-weight: 400 700;
+  font-display: swap;
+}
+
+:root {
+  --roxo-noite: #1a1030;
+  --roxo: #2c1b4d;
+  --roxo-medio: #3d2766;
+  --roxo-claro: #5a3d8f;
+  --rosa: #ff6fb0;
+  --rosa-escuro: #c7407f;
+  --dourado: #ffd479;
+  --dourado-escuro: #c98f2e;
+  --creme: #fff4e0;
+  --menta: #7fd6c2;
+  --texto: #fdf6ff;
+  --texto-suave: #cbbde6;
+
+  --fonte-titulo: "Pixelify Sans", "Fredoka", monospace;
+  --fonte-texto: "Fredoka", "Segoe UI", Verdana, sans-serif;
+
+  --margem-segura-baixo: env(safe-area-inset-bottom, 0px);
+  --altura-caixa-dialogo: clamp(150px, 30vh, 300px);
+
+  /* moldura padrão dos painéis: contorno escuro + filete dourado + contorno escuro */
+  --moldura: 0 0 0 3px var(--roxo-noite), 0 0 0 5px var(--dourado), 0 0 0 8px var(--roxo-noite),
+    0 14px 34px rgba(0, 0, 0, 0.55);
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  background: var(--roxo-noite);
+  overscroll-behavior: none;
+}
+
+body {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+/* Contêiner raiz: ocupa a janela inteira, em qualquer tela (nada de "quadradinho" no meio) */
+#jogo {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  background: var(--roxo-noite);
+  color: var(--texto);
+  overflow: hidden;
+  font-family: var(--fonte-texto);
+  font-size: clamp(14px, calc(0.55rem + 0.75vmin), 22px);
+}
+
+/* Cenário: fundo da cena atual, preenche tudo atrás do palco e da caixa de diálogo */
+#cenario {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+/* Palco: área onde as pôneis ficam de pé, acima da caixa de diálogo */
+#palco {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: calc(var(--altura-caixa-dialogo) + 14px + 1.9em + var(--margem-segura-baixo));
+  min-height: 0;
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0 max(3vw, 12px);
+  pointer-events: none;
+}
+
+.personagem {
+  pointer-events: auto;
+}
+
+/* ---- botões (mesmo estilo em todo o jogo) ---- */
+
+.botao {
+  font-family: var(--fonte-titulo);
+  font-weight: 700;
+  font-size: 1.05em;
+  letter-spacing: 0.04em;
+  padding: 0.6em 1.6em;
+  min-height: 44px;
+  border-radius: 10px;
+  color: #fff;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
+  transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.15s ease;
+  position: relative;
+}
+
+.botao.principal {
+  background: linear-gradient(180deg, #ff9ccd 0%, var(--rosa) 45%, var(--rosa-escuro) 100%);
+  box-shadow: 0 0 0 3px var(--roxo-noite), 0 5px 0 3px #7a1f4d, 0 10px 22px rgba(0, 0, 0, 0.4);
+}
+
+.botao.secundario {
+  background: linear-gradient(180deg, var(--roxo-claro) 0%, var(--roxo-medio) 100%);
+  box-shadow: 0 0 0 3px var(--roxo-noite), 0 0 0 5px rgba(255, 212, 121, 0.55), 0 5px 0 5px #150b26,
+    0 10px 22px rgba(0, 0, 0, 0.4);
+}
+
+.botao.pequeno {
+  font-size: 0.85em;
+  padding: 0.35em 0.9em;
+  min-height: 34px;
+}
+
+.botao:hover,
+.botao:focus-visible {
+  filter: brightness(1.1);
+  transform: translateY(-2px);
+  outline: none;
+}
+
+.botao:active {
+  transform: translateY(3px);
+  filter: brightness(0.95);
+}
+
+kbd {
+  display: inline-block;
+  min-width: 1.7em;
+  padding: 0.05em 0.4em;
+  margin: 0 0.12em;
+  border-radius: 5px;
+  background: var(--creme);
+  color: var(--roxo-noite);
+  font-family: var(--fonte-titulo);
+  font-weight: 700;
+  font-size: 0.85em;
+  text-align: center;
+  box-shadow: 0 3px 0 #b9a47e;
+}
+
+.separador {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  margin: 0 0.6em 0.15em;
+  border-radius: 1px;
+  background: var(--dourado);
+  transform: rotate(45deg);
+  vertical-align: middle;
+}
+
+/* setinha desenhada em CSS (sem caractere/emoji) */
+.chevron {
+  display: inline-block;
+  width: 0.7em;
+  height: 0.7em;
+  border-top: 0.22em solid currentColor;
+  border-right: 0.22em solid currentColor;
+  border-radius: 2px;
+}
+.chevron.direita {
+  transform: translateX(-20%) rotate(45deg);
+}
+.chevron.esquerda {
+  transform: translateX(20%) rotate(-135deg);
+}
+
+/* painel padrão (Como jogar, Caso resolvido, créditos...) */
+.painel {
+  background: linear-gradient(180deg, var(--roxo-medio) 0%, var(--roxo) 100%);
+  border-radius: 12px;
+  box-shadow: var(--moldura);
+  padding: 1.4em 1.6em;
+}
+
+.painel-titulo {
+  font-family: var(--fonte-titulo);
+  color: var(--dourado);
+  font-size: 1.6em;
+  text-align: center;
+  margin-bottom: 0.6em;
+  text-shadow: 0 3px 0 var(--roxo-noite);
+}
+
+/* ---- HUD (canto de cima) ---- */
+
+#hud {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: max(10px, env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px)) 0
+    max(12px, env(safe-area-inset-left, 0px));
+  pointer-events: none;
+}
+
+#hud > * {
+  pointer-events: auto;
+}
+
+#contador-ingredientes {
+  display: flex;
+  gap: 0.35em;
+  padding: 0.35em 0.5em;
+  border-radius: 10px;
+  background: rgba(26, 16, 48, 0.72);
+  box-shadow: 0 0 0 2px rgba(255, 212, 121, 0.45);
+}
+
+.slot-ingrediente {
+  width: 2.1em;
+  height: 2.1em;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.07);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.slot-ingrediente img {
+  width: 80%;
+  height: 80%;
+  image-rendering: pixelated;
+  filter: brightness(0) opacity(0.35);
+}
+
+.slot-ingrediente.coletado {
+  background: rgba(255, 212, 121, 0.18);
+  box-shadow: inset 0 0 0 2px rgba(255, 212, 121, 0.6);
+}
+
+.slot-ingrediente.coletado img {
+  filter: drop-shadow(0 0 4px rgba(255, 212, 121, 0.8));
+}
+
+.slot-ingrediente.acabou-de-chegar {
+  animation: slot-chegou 0.6s ease;
+}
+
+@keyframes slot-chegou {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.35);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+#hud-botoes {
+  display: flex;
+  gap: 0.45em;
+}
+
+.botao-hud {
+  height: 2.5em;
+  min-width: 2.5em;
+  padding: 0 0.9em;
+  border-radius: 10px;
+  background: rgba(26, 16, 48, 0.72);
+  box-shadow: 0 0 0 2px rgba(255, 212, 121, 0.45);
+  font-family: var(--fonte-titulo);
+  font-size: 0.85em;
+  color: var(--creme);
+  transition: background 0.15s ease;
+}
+
+.botao-hud:hover,
+.botao-hud:focus-visible {
+  background: var(--roxo-claro);
+  outline: none;
+}
+
+.botao-hud.icone {
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.botao-hud svg {
+  width: 1.3em;
+  height: 1.3em;
+  fill: none;
+  stroke: var(--creme);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.botao-hud svg .alto-falante {
+  fill: var(--creme);
+}
+
+#botao-som .risco {
+  display: none;
+}
+#botao-som.mudo .ondas {
+  display: none;
+}
+#botao-som.mudo .risco {
+  display: inline;
+  stroke: var(--rosa);
+}
+
+/* ---- histórico ---- */
+
+#painel-log {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  background: rgba(16, 9, 30, 0.94);
+  display: flex;
+  flex-direction: column;
+  padding: max(14px, env(safe-area-inset-top, 0px)) max(16px, 4vw) 16px;
+}
+
+#painel-log-cabecalho {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--fonte-titulo);
+  color: var(--dourado);
+  font-size: 1.2em;
+  margin: 0 auto 0.8em;
+  width: 100%;
+  max-width: 900px;
+}
+
+#painel-log-lista {
+  flex: 1;
+  overflow-y: auto;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+#painel-log-lista p {
+  margin-bottom: 0.7em;
+  line-height: 1.5;
+}
+
+#painel-log-lista strong {
+  display: block;
+  font-family: var(--fonte-titulo);
+  font-size: 0.85em;
+}
+
+#painel-log-lista .narracao {
+  font-style: italic;
+  color: var(--texto-suave);
+}
+
+/* ---- plaquinha com o nome do lugar ---- */
+
+#placa-local {
+  position: absolute;
+  top: max(4.2em, calc(env(safe-area-inset-top, 0px) + 3.6em));
+  left: 50%;
+  z-index: 25;
+  transform: translateX(-50%);
+  padding: 0.45em 1.4em;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #8a5a32, #6b4224);
+  box-shadow: 0 0 0 3px var(--roxo-noite), 0 0 0 5px var(--dourado), 0 0 0 8px var(--roxo-noite),
+    0 10px 24px rgba(0, 0, 0, 0.45);
+  font-family: var(--fonte-titulo);
+  font-size: 1.15em;
+  color: var(--creme);
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.4);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+#placa-local.entrando {
+  animation: placa-entra 0.45s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+#placa-local.saindo {
+  animation: placa-sai 0.4s ease forwards;
+}
+
+@keyframes placa-entra {
+  from {
+    transform: translate(-50%, -160%) rotate(-3deg);
+  }
+  to {
+    transform: translate(-50%, 0) rotate(0);
+  }
+}
+
+@keyframes placa-sai {
+  to {
+    transform: translate(-50%, -200%);
+    opacity: 0;
+  }
+}
+
+/* ---- ingrediente voando até o contador ---- */
+
+#voo-camada {
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+}
+
+.item-voando {
+  position: absolute;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 0 10px rgba(255, 212, 121, 0.9));
+  transition: transform 0.7s cubic-bezier(0.5, -0.3, 0.7, 1);
+}
+
+/* ---- transição entre telas ---- */
+
+#transicao {
+  position: absolute;
+  inset: 0;
+  z-index: 90;
+  background: var(--roxo-noite);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.28s ease;
+}
+
+#transicao.ativa {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ---- aviso de rotação — leve, só sugere girar o celular ---- */
+
+#aviso-rotacao {
+  position: fixed;
+  left: 50%;
+  bottom: calc(1.2em + var(--margem-segura-baixo));
+  transform: translateX(-50%);
+  z-index: 95;
+  background: rgba(26, 16, 48, 0.9);
+  box-shadow: 0 0 0 2px var(--dourado);
+  color: var(--creme);
+  padding: 0.6em 1.1em;
+  border-radius: 999px;
+  font-family: var(--fonte-titulo);
+  font-size: 0.85rem;
+  text-align: center;
+  pointer-events: none;
+}
+
+/* ---- telas pequenas ---- */
+
+@media (max-width: 520px) {
+  :root {
+    --altura-caixa-dialogo: clamp(150px, 34vh, 260px);
+  }
+  .botao-hud {
+    padding: 0 0.6em;
+  }
+}
+
+/* celular deitado: caixa de diálogo mais baixa pra sobrar palco */
+@media (max-height: 480px) and (orientation: landscape) {
+  :root {
+    --altura-caixa-dialogo: clamp(112px, 36vh, 170px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

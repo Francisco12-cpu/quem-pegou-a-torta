@@ -1,0 +1,751 @@
+/* minigame.css — visual do baú. A MECÂNICA é a do `mine game.html` original (arrombar
+   fechadura, ver ARQUITETURA.md); aqui só mudou a aparência, pra combinar com o resto do jogo:
+   fundo da própria casa desfocado, fechadura em madeira com ferragens douradas, a mesma
+   paleta/fontes/botões do jogo e a cena do baú abrindo. As posições dos pinos, da linha e do
+   grampo continuam controladas pelo JS exatamente como antes. */
+
+#minigame-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  background: var(--roxo-noite);
+  color: var(--texto);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.mg-fundo {
+  position: absolute;
+  inset: -40px;
+  filter: blur(10px) brightness(0.45) saturate(1.1);
+}
+
+.mg-app {
+  position: relative;
+  height: 100%;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: max(10px, env(safe-area-inset-top, 0px)) 12px calc(8px + var(--margem-segura-baixo));
+  gap: 8px;
+  max-width: 620px;
+  margin: 0 auto;
+  min-height: 0;
+  width: 100%;
+}
+
+.mg-titulo {
+  text-align: center;
+  font-family: var(--fonte-titulo);
+  font-weight: 700;
+  font-size: 1.35em;
+  color: var(--dourado);
+  text-shadow: 0 3px 0 var(--roxo-noite);
+  flex-shrink: 0;
+}
+
+/* ---- HUD ---- */
+.mg-hud {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.mg-chip {
+  flex: 1;
+  max-width: 130px;
+  background: rgba(26, 16, 48, 0.8);
+  box-shadow: 0 0 0 2px rgba(255, 212, 121, 0.45);
+  padding: 5px 8px;
+  border-radius: 8px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  font-variant-numeric: tabular-nums;
+  min-width: 0;
+}
+.mg-chip img {
+  width: 1.2em;
+  height: 1.2em;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+.mg-chip b {
+  color: var(--dourado);
+  font-family: var(--fonte-titulo);
+  font-weight: 700;
+  font-size: 1em;
+  white-space: nowrap;
+}
+
+/* ---- área da fechadura ---- */
+.mg-lock-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 0;
+}
+
+.mg-pin-bar {
+  position: relative;
+  height: 26px;
+  flex-shrink: 0;
+  padding: 0 2%;
+}
+.mg-pin-dot {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 38px;
+  height: 26px;
+  padding: 9px 0;
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.mg-pin-dot .mg-bar {
+  display: block;
+  width: 100%;
+  height: 9px;
+  background: rgba(26, 16, 48, 0.8);
+  border: 2px solid rgba(255, 244, 224, 0.3);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+  transition: border-color 0.18s, box-shadow 0.18s;
+}
+.mg-pin-dot .mg-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0%;
+  background: linear-gradient(90deg, var(--rosa), var(--dourado));
+  transition: width 0.05s linear;
+}
+.mg-pin-dot.selected .mg-bar {
+  border-color: var(--dourado);
+  box-shadow: 0 0 10px rgba(255, 212, 121, 0.6);
+}
+.mg-pin-dot.set .mg-bar {
+  border-color: var(--menta);
+  box-shadow: 0 0 10px rgba(127, 214, 194, 0.6);
+}
+.mg-pin-dot.set .mg-fill {
+  width: 100% !important;
+  background: linear-gradient(90deg, #3fae94, var(--menta));
+}
+
+/* a fechadura: frente de baú de madeira com moldura dourada */
+.mg-lock {
+  flex: 1;
+  position: relative;
+  min-height: 200px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #5a3419;
+  box-shadow: 0 0 0 3px var(--roxo-noite), 0 0 0 7px var(--dourado-escuro), 0 0 0 10px var(--roxo-noite),
+    0 20px 45px rgba(0, 0, 0, 0.6), inset 0 0 50px rgba(0, 0, 0, 0.55);
+  cursor: pointer;
+  touch-action: none;
+}
+.mg-lock.shake {
+  animation: mg-shake 0.3s ease;
+}
+@keyframes mg-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-6px);
+  }
+  40% {
+    transform: translateX(6px);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(4px);
+  }
+}
+
+/* parte de cima (onde ficam as câmaras dos pinos): tábuas escuras */
+.mg-shell {
+  position: absolute;
+  inset: 0 0 60% 0;
+  background: repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.18) 0 3px, transparent 3px 22%),
+    linear-gradient(180deg, #6e4222 0%, #57331a 60%, #43260f 100%);
+  box-shadow: inset 0 -18px 30px rgba(0, 0, 0, 0.5);
+}
+/* parte de baixo (miolo da fechadura): tábuas mais claras */
+.mg-plug {
+  position: absolute;
+  inset: 40% 0 0 0;
+  background: repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.14) 0 3px, transparent 3px 22%),
+    linear-gradient(180deg, #a8683a 0%, #8a5429 45%, #6b3f1d 100%);
+  box-shadow: inset 0 10px 24px rgba(0, 0, 0, 0.45);
+}
+/* rebites dourados nos cantos */
+.mg-plug::before,
+.mg-plug::after,
+.mg-shell::before,
+.mg-shell::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--dourado);
+  box-shadow: inset -2px -2px 0 var(--dourado-escuro), 0 0 0 2px var(--roxo-noite);
+}
+.mg-shell::before {
+  left: 10px;
+  top: 10px;
+}
+.mg-shell::after {
+  right: 10px;
+  top: 10px;
+}
+.mg-plug::before {
+  left: 10px;
+  bottom: 10px;
+}
+.mg-plug::after {
+  right: 10px;
+  bottom: 10px;
+}
+
+.mg-shear-line {
+  position: absolute;
+  top: 40%;
+  left: 0;
+  right: 0;
+  height: 4px;
+  transform: translateY(-50%);
+  background: linear-gradient(90deg, transparent, var(--dourado) 10%, #fff6d6 50%, var(--dourado) 90%, transparent);
+  box-shadow: 0 0 14px rgba(255, 212, 121, 0.85), 0 0 30px rgba(255, 111, 176, 0.35);
+  z-index: 3;
+  pointer-events: none;
+}
+.mg-chamber {
+  position: absolute;
+  top: 0;
+  height: 40%;
+  background: linear-gradient(180deg, #1c0f06, #2e1a0c);
+  border-radius: 0 0 5px 5px;
+  box-shadow: inset 0 0 12px #000;
+  z-index: 2;
+  pointer-events: none;
+}
+.mg-keyway {
+  position: absolute;
+  left: 7%;
+  right: 7%;
+  top: 78%;
+  height: 18%;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #1c0f06, #2e1a0c 60%, #1c0f06);
+  box-shadow: inset 0 6px 16px #000, 0 0 0 3px var(--dourado-escuro), 0 0 0 5px var(--roxo-noite);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* ---- pinos (latão) ---- */
+.mg-pins {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+.mg-pin {
+  position: absolute;
+}
+.mg-pin-body {
+  position: absolute;
+  inset: 0;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #8a5a1c 0%, #e2b25a 25%, #fff0c4 48%, #d9a54a 72%, #7a4d15 100%);
+  box-shadow: 0 0 0 2px var(--roxo-noite), 0 0 10px rgba(0, 0, 0, 0.6);
+}
+.mg-pin-notch {
+  position: absolute;
+  left: -22%;
+  right: -22%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #a02a62, var(--rosa) 40%, #ffe3f1 50%, var(--rosa) 60%, #a02a62);
+  box-shadow: 0 0 0 2px var(--roxo-noite), 0 0 12px rgba(255, 111, 176, 0.9);
+  z-index: 2;
+}
+.mg-pin.set .mg-pin-body {
+  background: linear-gradient(90deg, #2d7a67 0%, #6fd0b8 25%, #e6fff8 48%, #6fc9b1 72%, #25604f 100%);
+  box-shadow: 0 0 0 2px var(--roxo-noite), 0 0 16px rgba(127, 214, 194, 0.7);
+}
+.mg-pin.set .mg-pin-notch {
+  background: linear-gradient(90deg, #2d7a67, var(--menta) 42%, #fff 50%, var(--menta) 58%, #2d7a67);
+  box-shadow: 0 0 0 2px var(--roxo-noite), 0 0 18px rgba(127, 214, 194, 1);
+}
+
+/* ---- grampo (ferramenta) ---- */
+.mg-pick {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  z-index: 6;
+  pointer-events: none;
+  transition: left 0.09s cubic-bezier(0.2, 0.85, 0.3, 1);
+}
+.mg-rod {
+  position: absolute;
+  left: 0;
+  margin-left: -3px;
+  width: 6px;
+  background: linear-gradient(90deg, #7d8599, #eef2fa 45%, #ffffff 50%, #c3cad9 60%, #6d7489);
+  border-radius: 3px;
+  box-shadow: 0 0 0 2px var(--roxo-noite);
+}
+.mg-tip {
+  position: absolute;
+  left: 0;
+  margin-left: -7px;
+  width: 14px;
+  height: 14px;
+  margin-top: -7px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 30%, #fff, #d7dbe6 55%, #7d8599);
+  box-shadow: 0 0 0 2px var(--roxo-noite), 0 0 12px rgba(255, 255, 255, 0.8);
+}
+.mg-handle {
+  position: absolute;
+  left: 0;
+  bottom: 2%;
+  transform: translateX(-50%);
+  width: 36px;
+  height: 44px;
+  filter: drop-shadow(0 0 2px var(--roxo-noite));
+  overflow: visible;
+  pointer-events: none;
+}
+.mg-pick.smooth .mg-rod,
+.mg-pick.smooth .mg-tip {
+  transition: top 0.2s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+.mg-pick.pushing .mg-rod {
+  animation: mg-jitter 0.07s linear infinite;
+}
+@keyframes mg-jitter {
+  0% {
+    transform: translateX(-0.6px);
+  }
+  50% {
+    transform: translateX(0.6px);
+  }
+  100% {
+    transform: translateX(-0.6px);
+  }
+}
+
+/* ---- flashes ---- */
+.mg-flash {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  opacity: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 45%, rgba(255, 236, 170, 0.95), rgba(255, 212, 121, 0.4) 38%, transparent 68%);
+}
+.mg-flash.red {
+  background: radial-gradient(circle at 50% 45%, rgba(255, 90, 120, 0.85), rgba(255, 60, 100, 0.3) 40%, transparent 70%);
+}
+.mg-flash.on {
+  animation: mg-flash-anim 0.85s ease-out;
+}
+@keyframes mg-flash-anim {
+  0% {
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ---- overlay interno (intro / vitória / falha) ---- */
+.mg-inner-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(26, 16, 48, 0.93);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  padding: 14px;
+  text-align: center;
+  overflow-y: auto;
+}
+.mg-inner-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+.mg-ov-inner {
+  max-width: 400px;
+  width: 100%;
+  margin: auto;
+}
+.mg-ov-icone {
+  width: clamp(44px, 10vmin, 64px);
+  margin: 0 auto 10px;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 0 14px rgba(255, 212, 121, 0.6));
+  animation: flutua 2.4s ease-in-out infinite;
+}
+.mg-ov-icone.travado {
+  animation: mg-shake 0.4s ease 2;
+  filter: drop-shadow(0 0 14px rgba(255, 90, 120, 0.7));
+}
+.mg-inner-overlay h2 {
+  font-family: var(--fonte-titulo);
+  font-size: 1.5em;
+  color: var(--dourado);
+  text-shadow: 0 3px 0 var(--roxo-noite);
+  margin-bottom: 8px;
+}
+.mg-inner-overlay p {
+  font-size: 0.95em;
+  line-height: 1.55;
+  color: var(--texto-suave);
+  margin-bottom: 12px;
+}
+.mg-inner-overlay p b {
+  color: var(--dourado);
+}
+.mg-ov-erros {
+  display: table;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0.25em 0.8em;
+  border-radius: 6px;
+  background: rgba(255, 111, 176, 0.15);
+  box-shadow: 0 0 0 2px rgba(255, 111, 176, 0.5);
+  color: var(--creme) !important;
+}
+.mg-ov-stats {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.mg-ov-stat {
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 0 0 2px rgba(255, 212, 121, 0.35);
+  border-radius: 8px;
+  padding: 6px 12px;
+  min-width: 76px;
+  flex: 1;
+  max-width: 110px;
+}
+.mg-ov-stat span {
+  display: block;
+  font-size: 0.75em;
+  color: var(--texto-suave);
+  margin-bottom: 2px;
+}
+.mg-ov-stat b {
+  font-family: var(--fonte-titulo);
+  font-size: 1.2em;
+  color: var(--dourado);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- cena do prêmio: baú abre, ingrediente sobe, protagonista pega ---- */
+.mg-premio {
+  position: relative;
+  height: clamp(110px, 26vmin, 180px);
+  margin: 0 auto 8px;
+  width: min(300px, 90%);
+}
+.mg-premio-luz {
+  position: absolute;
+  left: 38%;
+  bottom: 10%;
+  width: 70%;
+  aspect-ratio: 1;
+  transform: translate(-50%, 30%) scale(0);
+  background: radial-gradient(circle, rgba(255, 236, 150, 0.9), transparent 62%);
+  transition: transform 0.5s ease;
+}
+.mg-premio-bau {
+  position: absolute;
+  left: 38%;
+  bottom: 0;
+  height: 48%;
+  transform: translateX(-50%);
+  image-rendering: pixelated;
+}
+.mg-premio-item {
+  position: absolute;
+  left: 38%;
+  bottom: 22%;
+  height: 34%;
+  transform: translate(-50%, 0) scale(0.3);
+  opacity: 0;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 0 10px rgba(255, 212, 121, 0.95));
+}
+.mg-premio-protagonista {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  height: 78%;
+}
+.mg-premio-protagonista .sprite-personagem {
+  height: 100%;
+  width: auto;
+  image-rendering: pixelated;
+}
+.mg-inner-overlay.aberto .mg-premio-bau {
+  animation: mg-bau-abre 0.35s ease;
+}
+.mg-inner-overlay.aberto .mg-premio-luz {
+  transform: translate(-50%, 30%) scale(1);
+}
+.mg-inner-overlay.aberto .mg-premio-item {
+  animation: mg-item-sobe 0.7s cubic-bezier(0.2, 1.4, 0.4, 1) 0.15s forwards, flutua 2s ease-in-out 1s infinite;
+}
+.mg-inner-overlay.aberto .mg-premio-protagonista {
+  animation: mg-pula 0.45s ease 0.6s 2;
+}
+@keyframes mg-bau-abre {
+  0% {
+    transform: translateX(-50%) scale(1, 1);
+  }
+  40% {
+    transform: translateX(-50%) scale(1.15, 0.85);
+  }
+  100% {
+    transform: translateX(-50%) scale(1, 1);
+  }
+}
+@keyframes mg-item-sobe {
+  from {
+    transform: translate(-50%, 40%) scale(0.3);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, -60%) scale(1);
+    opacity: 1;
+  }
+}
+@keyframes mg-pula {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-14%);
+  }
+}
+.mg-premio-texto {
+  font-size: 1.05em !important;
+  color: var(--creme) !important;
+}
+
+/* ---- controles inferiores ---- */
+.mg-controls {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+  flex-shrink: 0;
+  height: 60px;
+}
+.mg-arrow {
+  flex: 0 0 60px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, var(--roxo-claro), var(--roxo-medio));
+  box-shadow: 0 0 0 3px var(--roxo-noite), 0 0 0 5px rgba(255, 212, 121, 0.55), 0 5px 0 5px #150b26;
+  font-size: 20px;
+  color: var(--dourado);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s;
+}
+.mg-arrow:active {
+  transform: translateY(3px);
+}
+.mg-arrow:disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+.mg-hold {
+  flex: 1;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #ff9ccd 0%, var(--rosa) 45%, var(--rosa-escuro) 100%);
+  box-shadow: 0 0 0 3px var(--roxo-noite), 0 5px 0 3px #7a1f4d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-family: var(--fonte-titulo);
+  font-size: 1.2em;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
+  transition: transform 0.1s, filter 0.1s;
+  position: relative;
+  overflow: hidden;
+}
+.mg-hold.active {
+  transform: translateY(3px);
+  filter: brightness(1.15);
+  box-shadow: 0 0 0 3px var(--roxo-noite), 0 2px 0 3px #7a1f4d, 0 0 22px rgba(255, 111, 176, 0.6);
+}
+.mg-hold:disabled {
+  filter: grayscale(0.6) brightness(0.7);
+}
+.mg-hold .mg-pulse {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  transform: rotate(45deg);
+  background: var(--dourado);
+  box-shadow: 0 0 0 2px var(--roxo-noite);
+  flex-shrink: 0;
+}
+.mg-hold.active .mg-pulse {
+  animation: mg-pulse 0.5s ease-in-out infinite;
+}
+@keyframes mg-pulse {
+  0%,
+  100% {
+    transform: rotate(45deg) scale(1);
+  }
+  50% {
+    transform: rotate(45deg) scale(1.5);
+  }
+}
+
+.mg-hint {
+  text-align: center;
+  font-size: 0.78em;
+  color: var(--texto-suave);
+  line-height: 1.5;
+  flex-shrink: 0;
+  padding: 2px 4px;
+}
+
+.mg-fechar {
+  flex-shrink: 0;
+  font-size: 0.85em;
+  color: var(--texto-suave);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  padding: 0.3em;
+  align-self: center;
+}
+
+/* tela estreita: o HUD do jogo (ingredientes e botões) fica em cima — desce o conteúdo */
+@media (max-width: 640px) {
+  .mg-app {
+    padding-top: calc(3.2em + env(safe-area-inset-top, 0px));
+  }
+}
+
+@media (max-width: 380px) {
+  .mg-app {
+    padding: calc(3em + env(safe-area-inset-top, 0px)) 8px 4px;
+    gap: 5px;
+  }
+  .mg-arrow {
+    flex: 0 0 50px;
+  }
+  .mg-controls {
+    height: 54px;
+  }
+  .mg-handle {
+    width: 30px;
+    height: 38px;
+  }
+  .mg-pin-dot {
+    width: 30px;
+    height: 22px;
+  }
+}
+
+/* celular deitado: tudo mais compacto pra caber a fechadura */
+@media (orientation: landscape) and (max-height: 500px) {
+  .mg-app {
+    padding: 6px 10px;
+    gap: 4px;
+  }
+  .mg-titulo,
+  .mg-hint {
+    display: none;
+  }
+  .mg-pin-bar {
+    height: 20px;
+  }
+  .mg-controls {
+    height: 46px;
+  }
+  .mg-handle {
+    width: 26px;
+    height: 32px;
+  }
+  .mg-premio {
+    height: 90px;
+  }
+}
+
+/* ---- FERRAMENTA DE TESTE (só aparece rodando local — ver dados/config.js) ----
+   listras de "atenção" pra ficar óbvio que não faz parte do jogo */
+.mg-teste {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 5px 8px;
+  border-radius: 8px;
+  background: repeating-linear-gradient(135deg, #f5c518 0 12px, #1a1030 12px 24px);
+  box-shadow: 0 0 0 2px #1a1030;
+}
+.mg-teste-rotulo {
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #1a1030;
+  color: #f5c518;
+  font-family: var(--fonte-titulo);
+  font-weight: 700;
+  font-size: 0.8em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.mg-teste button {
+  padding: 3px 10px;
+  border-radius: 5px;
+  background: #fff;
+  color: #1a1030;
+  font-family: var(--fonte-titulo);
+  font-weight: 700;
+  font-size: 0.8em;
+  box-shadow: 0 0 0 2px #1a1030;
+}
+.mg-teste button:hover {
+  background: #f5c518;
+}

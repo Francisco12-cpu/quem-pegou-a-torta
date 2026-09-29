@@ -1,0 +1,84 @@
+/* cenarios.css — fundos de cada cena. O motor de diálogo e o de exploração só trocam a
+   classe do elemento de fundo (`fundo-<id>`); todo o resto é só CSS.
+
+   Cada fundo usa a imagem do autor (assets/cenarios/, gerada por
+   ferramentas/preparar-assets.py) por cima, com um gradiente de reserva por baixo — se a
+   imagem não carregar, a cena continua com cor coerente em vez de ficar preta. A casa da
+   Rainbow Dash não tem imagem fornecida, então segue só em CSS (céu com nuvens). */
+
+#cenario {
+  background-repeat: no-repeat;
+}
+
+/* ---- cena 1: confeitaria da Pinkie Pie ---- */
+
+.fundo-cozinha-pinkie {
+  background:
+    url("../assets/cenarios/cozinha-pinkie.png") center / cover no-repeat,
+    linear-gradient(to bottom, #4a2b52 0%, #a4527a 45%, #e08a5c 75%, #b96a3f 100%);
+}
+
+/* ---- cena 2: biblioteca da Twilight ---- */
+
+.fundo-biblioteca-twilight {
+  background:
+    url("../assets/cenarios/biblioteca-twilight.png") center / cover no-repeat,
+    linear-gradient(to bottom, #2a1a40 0%, #4c2f6b 55%, #24331f 78%, #16241a 100%);
+}
+
+/* ---- cena 3: ateliê da Rarity ---- */
+
+.fundo-atelie-rarity {
+  background:
+    url("../assets/cenarios/atelie-rarity.png") center / cover no-repeat,
+    linear-gradient(to bottom, #3a2145 0%, #7c4a8f 50%, #d69bc7 85%, #f0c6da 100%);
+}
+
+/* ---- cena 4: casa da Rainbow Dash — entre as nuvens (sem imagem fornecida, só CSS) ---- */
+
+.fundo-casa-rainbow-dash {
+  background:
+    radial-gradient(circle 9vmin at 15% 70%, #fff, transparent 70%),
+    radial-gradient(circle 12vmin at 40% 82%, #fff, transparent 70%),
+    radial-gradient(circle 8vmin at 68% 72%, #fff, transparent 70%),
+    radial-gradient(circle 11vmin at 88% 66%, #fff, transparent 70%),
+    linear-gradient(to bottom, #1d63c9 0%, #3f9bdc 45%, #8fd0ef 80%, #d8f2fb 100%);
+}
+
+/* ---- cena 5: casa da Fluttershy ---- */
+
+.fundo-casa-fluttershy {
+  background:
+    url("../assets/cenarios/casa-fluttershy.png") center / cover no-repeat,
+    linear-gradient(to bottom, #bfe8f5 0%, #d8efc7 40%, #8fbf6a 72%, #5c9245 100%);
+}
+
+/* ---- cenas 6, 7 e 8: local da festa ---- */
+
+.fundo-festa-decorada {
+  background:
+    url("../assets/cenarios/festa-decorada.png") center / cover no-repeat,
+    linear-gradient(to bottom, #2a1a40 0%, #6b3a6b 40%, #c9714f 75%, #e8a85c 100%);
+}
+
+/* ---- fazenda da Applejack — fundo opcional pras cenas 7/8 (ROTEIRO.md) ---- */
+
+.fundo-celeiro-applejack {
+  background:
+    url("../assets/cenarios/celeiro-applejack.png") center / cover no-repeat,
+    linear-gradient(to bottom, #9fd8f0 0%, #d8efc7 55%, #c9a36b 100%);
+}
+
+/* ---- rua/praça de Ponyville — caminho andável entre as casas (camada de exploração) ---- */
+
+.fundo-rua-ponyville {
+  background:
+    url("../assets/cenarios/rua-ponyville.png") center / cover no-repeat,
+    linear-gradient(to bottom, #6fb3e0 0%, #bfe3f2 45%, #dff3d8 46%, #8fbf6a 100%);
+}
+
+.fundo-praca-ponyville {
+  background:
+    url("../assets/cenarios/praca-ponyville.png") center / cover no-repeat,
+    linear-gradient(to bottom, #6fb3e0 0%, #bfe3f2 45%, #dff3d8 46%, #8fbf6a 100%);
+}
