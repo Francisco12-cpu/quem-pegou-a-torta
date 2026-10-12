@@ -217,7 +217,36 @@
       <div class="especial-dica">Toque para continuar</div>
     </div>
 
-    <!-- ===== escolha do nome (depois da abertura) ===== -->
+    <!-- ===== escolha do personagem (depois da abertura) — dados/protagonistas.js ===== -->
+    <div id="tela-escolha" class="tela" hidden>
+      <div id="escolha-fundo" aria-hidden="true"></div>
+      <div class="tela-veu escolha-veu"></div>
+      <button id="escolha-estrela" type="button" aria-label="Estrela" hidden></button>
+      <div class="escolha-conteudo">
+        <h2 class="painel-titulo escolha-titulo">Escolha seu personagem</h2>
+        <p id="escolha-subtitulo" class="escolha-subtitulo"></p>
+
+        <div id="escolha-passo-categoria" class="escolha-passo">
+          <div id="escolha-categorias" class="escolha-categorias" role="group" aria-label="Categoria"></div>
+        </div>
+
+        <div id="escolha-passo-personagem" class="escolha-passo" hidden>
+          <div id="escolha-abas" class="escolha-abas" role="tablist"></div>
+          <div id="escolha-cartoes" class="escolha-cartoes" role="radiogroup" aria-label="Personagens"></div>
+          <div id="escolha-ficha" class="painel escolha-ficha" aria-live="polite">
+            <div id="escolha-nome" class="escolha-nome"></div>
+            <ul id="escolha-tracos" class="escolha-tracos"></ul>
+          </div>
+          <div class="escolha-botoes">
+            <button id="escolha-voltar" class="botao secundario" type="button">Voltar</button>
+            <button id="escolha-confirmar" class="botao principal" type="button">Confirmar</button>
+          </div>
+        </div>
+      </div>
+      <div id="escolha-hack" aria-hidden="true"></div>
+    </div>
+
+    <!-- ===== escolha do nome (depois do personagem) ===== -->
     <div id="tela-nome" class="tela" hidden>
       <div class="tela-fundo fundo-praca-ponyville"></div>
       <div class="tela-veu escuro"></div>
@@ -230,7 +259,10 @@
           <span id="nome-contador" aria-live="polite"></span>
         </div>
         <p id="nome-aviso" role="alert" hidden></p>
-        <button id="nome-confirmar" class="botao principal" type="submit">Confirmar</button>
+        <div class="nome-botoes">
+          <button id="nome-trocar" class="botao secundario" type="button">Trocar personagem</button>
+          <button id="nome-confirmar" class="botao principal" type="submit">Confirmar</button>
+        </div>
       </form>
     </div>
 
@@ -250,6 +282,7 @@
 
   <!-- dados (conteúdo) — carregados antes do motor -->
   <script src="dados/personagens.js"></script>
+  <script src="dados/protagonistas.js"></script>
   <script src="dados/cena-01-confeitaria.js"></script>
   <script src="dados/cena-02-twilight.js"></script>
   <script src="dados/cena-03-rarity.js"></script>
@@ -276,6 +309,7 @@
   <script src="js/engine-minigame.js"></script>
   <script src="js/engine-exploracao.js"></script>
   <script src="js/cena-especial.js"></script>
+  <script src="js/escolha-personagem.js"></script>
   <script src="js/nome.js"></script>
   <script src="js/telas.js"></script>
   <script src="js/main.js"></script>

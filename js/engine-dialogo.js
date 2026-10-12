@@ -78,9 +78,9 @@ var MotorDialogo = (function () {
     var p = buscarPersonagem("protagonista");
     if (!p) return;
 
-    if (el.dataset.montado !== "protagonista") {
+    if (el.dataset.montado !== p.sprite) {
       el.innerHTML = htmlPersonagemNoPalco(p);
-      el.dataset.montado = "protagonista";
+      el.dataset.montado = p.sprite; // muda se o jogador trocar de personagem
     }
 
     el.hidden = false; // sempre visível, nunca some (ver comentário acima)
@@ -143,9 +143,9 @@ var MotorDialogo = (function () {
     elementos.nomeFalante.style.setProperty("--cor-falante", cor || "#ffd479");
   }
 
-  // {nome} nas falas vira o nome que o jogador escolheu
+  // {nome} e {feminino|masculino} nas falas (ver textoDoProtagonista)
   function comNome(texto) {
-    return String(texto).replace(/\{nome\}/g, buscarPersonagem("protagonista").nome);
+    return textoDoProtagonista(texto);
   }
 
   function mostrarTexto(texto) {
@@ -188,7 +188,7 @@ var MotorDialogo = (function () {
       botao.type = "button";
       botao.className = "opcao";
       botao.style.animationDelay = i * 0.06 + "s";
-      botao.textContent = opcao.texto;
+      botao.textContent = comNome(opcao.texto);
       botao.addEventListener("click", function (e) {
         e.stopPropagation();
         selecionarOpcao(fala, opcao);
@@ -246,7 +246,7 @@ var MotorDialogo = (function () {
     Musica.efeito("interagir");
 
     var protagonista = buscarPersonagem("protagonista");
-    registrarHistorico(protagonista.nome, opcao.texto, protagonista.cor);
+    registrarHistorico(protagonista.nome, comNome(opcao.texto), protagonista.cor);
 
     // Protagonista nunca ocupa bloco no palco (ver dados/cena-01-confeitaria.js) — só pôneis têm lado.
     var falaEscolhida = {

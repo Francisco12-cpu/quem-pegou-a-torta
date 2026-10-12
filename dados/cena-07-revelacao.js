@@ -33,7 +33,7 @@ var CENA_07_REVELACAO = {
       quemFala: "applejack",
       lado: "esquerda",
       texto:
-        "Ah, minhas amigas... acho que vocês estão esquecendo uma coisa: a torta não é a parte mais importante dessa festa. O que importa é todo o esforço que vocês fizeram pra me fazer feliz — organizaram a festa, decoraram, prepararam a música, treinaram os bichinhos. Tudo isso só pra mim. Uma festa pode não ser perfeita, mas se estamos juntas, já é especial.",
+        "Ah, {minhas amigas|meus amigos}... acho que vocês estão esquecendo uma coisa: a torta não é a parte mais importante dessa festa. O que importa é todo o esforço que vocês fizeram pra me fazer feliz — organizaram a festa, decoraram, prepararam a música, treinaram os bichinhos. Tudo isso só pra mim. Uma festa pode não ser perfeita, mas se estamos {juntas|juntos}, já é especial.",
     },
     { quemFala: "fluttershy", lado: "direita", texto: "Isso é muito bonito..." },
     { quemFala: "rarity", lado: "esquerda", texto: "Concordo completamente." },
@@ -41,7 +41,7 @@ var CENA_07_REVELACAO = {
     { quemFala: "rainbow-dash", lado: "esquerda", texto: "Então... abraço em grupo?" },
     { quemFala: "pinkie", lado: "direita", texto: "ABRAÇO EM GRUPO!" },
     { quemFala: "narrador", texto: "O grupo inteiro se junta num abraço só." },
-    { quemFala: "twilight", lado: "esquerda", texto: "Espera. Se nenhuma de nós pegou a torta..." },
+    { quemFala: "twilight", lado: "esquerda", texto: "Espera. Se {nenhuma|nenhum} de nós pegou a torta..." },
     { quemFala: "rainbow-dash", lado: "direita", texto: "Então quem pegou?" },
     { quemFala: "narrador", texto: "Todos os olhares se viram pra Applejack." },
     {
@@ -67,7 +67,7 @@ var CENA_07_REVELACAO = {
       id: "revelacao-final",
       quemFala: "narrador",
       texto:
-        "E assim, depois de uma longa investigação, muitas suspeitas e várias confusões, o mistério da torta finalmente foi resolvido. No fim, elas descobriram que uma amizade verdadeira vale muito mais do que qualquer torta.",
+        "E assim, depois de uma longa investigação, muitas suspeitas e várias confusões, o mistério da torta finalmente foi resolvido. No fim, {elas|eles} descobriram que uma amizade verdadeira vale muito mais do que qualquer torta.",
     },
   ],
 };

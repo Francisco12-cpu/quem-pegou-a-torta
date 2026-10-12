@@ -24,7 +24,11 @@ var Nome = (function () {
         regras.mensagemProibido = json.mensagemProibido || regras.mensagemProibido;
         regras.proibidos = (json.proibidos || []).map(normalizar).filter(Boolean);
         regras.especiais = (json.especiais || []).map(function (grupo) {
-          return { nomes: (grupo.nomes || []).map(normalizar).filter(Boolean), mensagem: grupo.mensagem || regras.mensagemProibido };
+          return {
+            nomes: (grupo.nomes || []).map(normalizar).filter(Boolean),
+            mensagem: grupo.mensagem || regras.mensagemProibido,
+            liberadoPara: grupo.liberadoPara || null,
+          };
         });
       })
       .catch(function (erro) {
@@ -69,6 +73,8 @@ var Nome = (function () {
 
     for (var i = 0; i < regras.especiais.length; i++) {
       var grupo = regras.especiais[i];
+      // ex.: o nome do criador pode ser usado jogando com o personagem secreto dele
+      if (grupo.liberadoPara && PERSONAGENS.protagonista.visual === grupo.liberadoPara) continue;
       for (var j = 0; j < grupo.nomes.length; j++) {
         if (contemPalavras(normal, grupo.nomes[j]) || colado === grupo.nomes[j].replace(/ /g, "")) {
           return { ok: false, mensagem: grupo.mensagem, especial: true };

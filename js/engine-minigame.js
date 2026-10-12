@@ -159,7 +159,9 @@ var MotorMinigame = (function () {
     var faixa = document.createElement("div");
     faixa.className = "mg-teste";
     faixa.innerHTML =
-      '<span class="mg-teste-rotulo">Ferramenta de teste</span>' +
+      '<span class="mg-teste-rotulo">' +
+      (typeof modoCriadorAtivo === "function" && modoCriadorAtivo() ? "Modo criador" : "Ferramenta de teste") +
+      "</span>" +
       '<button type="button" id="mgTesteVencer">Forçar vitória</button>' +
       '<button type="button" id="mgTesteFalhar">Forçar falha</button>';
     el.overlay.querySelector(".mg-titulo").insertAdjacentElement("afterend", faixa);

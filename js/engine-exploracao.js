@@ -109,6 +109,10 @@ var MotorExploracao = (function () {
     el.chao.className = "fundo-" + tela.fundo;
     el.fundoDesfocado.className = "fundo-" + tela.fundo;
     el.cena.style.setProperty("--chao", tela.chao + "%");
+    if (el.protagonista.dataset.sprite !== PERSONAGENS.protagonista.sprite) {
+      el.protagonista.innerHTML = htmlAtor(PERSONAGENS.protagonista);
+      el.protagonista.dataset.sprite = PERSONAGENS.protagonista.sprite;
+    }
     el.protagonista.style.height = tela.escala + "%";
     el.protagonista.style.top = tela.chao + "%";
     el.acompanhante.style.height = tela.escala * 0.94 + "%";

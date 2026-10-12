@@ -13,4 +13,6 @@ var estado = {
   acusacaoEscolhida: null,
   inicio: null, // Date.now() ao apertar "Jogar"
   nomeJogador: null, // nome escolhido na tela "Escolha seu nome" (vale a sessão toda)
+  protagonista: null, // id do personagem escolhido (dados/protagonistas.js)
+  escolheuProtagonista: false, // já passou pela tela "Escolha seu personagem"
 };

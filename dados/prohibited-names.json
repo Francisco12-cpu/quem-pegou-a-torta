@@ -9,7 +9,7 @@
     "nazista"
   ],
 
-  "_especiais": "Nomes de brincadeira: cada grupo tem os nomes e a mensagem que aparece. O nome é recusado (não dá pra continuar com ele). Também pega se o nome estiver junto de outro, ex.: 'Matheus Silva'.",
+  "_especiais": "Nomes de brincadeira: cada grupo tem os nomes e a mensagem que aparece. O nome é recusado (não dá pra continuar com ele). Também pega se o nome estiver junto de outro, ex.: 'Matheus Silva'. 'liberadoPara' (opcional): id do personagem (dados/protagonistas.js) que PODE usar esses nomes.",
 
   "especiais": [
     {
@@ -18,7 +18,8 @@
     },
     {
       "nomes": ["Francisco", "Francisco Audir", "Audir", "filho.af"],
-      "mensagem": "Você não pode usar coisas do criador."
+      "mensagem": "Você não pode usar coisas do criador.",
+      "liberadoPara": "audir"
     }
   ]
 }

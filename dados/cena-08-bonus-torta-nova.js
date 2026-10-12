@@ -26,11 +26,11 @@ var CENA_08_BONUS_TORTA_NOVA = {
     { quemFala: "fluttershy", lado: "direita", texto: "Cuidado com o forno, ele está bem quente!" },
     { quemFala: "pinkie", lado: "esquerda", texto: "Relaxa, Fluttershy, eu nasci pronta pra isso!" },
     { quemFala: "applejack", lado: "direita", texto: "Vocês... fizeram outra torta?" },
-    { quemFala: "pinkie", lado: "esquerda", texto: "Melhor: fizemos JUNTAS!" },
+    { quemFala: "pinkie", lado: "esquerda", texto: "Melhor: fizemos {JUNTAS|JUNTOS}!" },
     {
       quemFala: "narrador",
       texto:
-        "E assim, além da amizade, a festa da Applejack ganhou uma torta novinha em folha — feita com um pouquinho de cada amiga.",
+        "E assim, além da amizade, a festa da Applejack ganhou uma torta novinha em folha — feita com um pouquinho de cada {amiga|amigo}.",
     },
   ],
 };

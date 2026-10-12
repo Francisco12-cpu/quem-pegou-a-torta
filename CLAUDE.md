@@ -20,27 +20,36 @@ branch `main`, raiz). Publicar = commit + `git push`; o Pages atualiza sozinho e
 ## Estrutura
 - `index.html` — todas as telas; scripts carregados em ordem (dados → motores → main).
 - `dados/` — conteúdo: falas (`cena-*.js`), mapa (`casas.js` = `TELAS`), baús, itens,
-  personagens, textos finais, músicas, `config.js`, `creditos.json`, `prohibited-names.json`.
+  personagens, textos finais, músicas, `config.js`, `creditos.json`, `prohibited-names.json`,
+  `protagonistas.js` (personagens jogáveis: id, categoria, sprite, cor, traços).
 - `js/` — motores: `engine-dialogo.js`, `engine-exploracao.js` (plataforma 2D horizontal,
   bordas trocam de tela), `engine-minigame.js` (fechadura do baú — mecânica original, só o
   visual pode mudar), `interface.js` (HUD, transições), `telas.js` (abertura, nome, menu,
   caso resolvido, final, créditos), `nome.js` (validação do nome), `cena-especial.js` (vídeo),
-  `musica.js`, `main.js` (fluxo). `js/vendor/profanity-br.js` = filtro de palavrões PT-BR
+  `musica.js`, `escolha-personagem.js` (escolha do protagonista -> `PERSONAGENS.protagonista`),
+  `main.js` (fluxo). `js/vendor/profanity-br.js` = filtro de palavrões PT-BR
   (MIT) já empacotado para navegador — não editar à mão.
 - `assets/originais/` — imagens originais (nunca alterar). `assets/sprites|cenarios|itens`
   são gerados por `python ferramentas/preparar-assets.py` (Pillow + NumPy). Para trocar um
   sprite, basta substituir o PNG com o mesmo nome. O script **não** sobrescreve
   `assets/sprites/protagonista.png` (só com `--refazer-protagonista`).
+- Protagonistas: `assets/sprites/protagonistas/<id>.png`, gerados de `assets/originais/ficha-protagonistas.png`
+  e `lavanda-e-caramelo.png` (caixas/frestas em `PROTAGONISTAS` no script). Falas com gênero usam
+  `{feminino|masculino}` (ex.: `{juntas|juntos}`), resolvido por `textoDoProtagonista`.
+- Segredo: o Audir (autor) é um card "???" trancado; 5 toques na estrelinha ciano do fundo da
+  escolha destravam (campo `secreto` em `protagonistas.js`; recarregar a página tranca de novo).
 - `assets/especiais/` — vídeo da chuva de estrelas (`.mp4` + `.webm` de reserva).
 
 ## Fluxo do jogo
-Abertura (libera o áudio) → Escolha seu nome → vídeo de carregamento → menu → confeitaria →
+Abertura (libera o áudio) → Escolha seu personagem (masculino/feminino → personagem; fundo =
+vídeo da chuva de estrelas) → Escolha seu nome (botão "Trocar personagem" volta) → menu → confeitaria →
 ruas/casas (Twilight, Rarity, Rainbow Dash, Fluttershy) → confronto → revelação →
 "Caso resolvido" → cena bônus (se pegou os 4 ingredientes) → final → créditos.
 
 ## Configurações importantes (`dados/config.js`)
 - `ferramentasDeTeste: "local"` — botões "Forçar vitória/falha" no baú só aparecem rodando no
-  computador (file:// ou localhost), nunca no site publicado. Manter assim.
+  computador (file:// ou localhost), nunca no site publicado. Manter assim. Exceção pedida pelo
+  autor: jogando com o personagem secreto Audir ("Modo criador") eles aparecem em qualquer lugar.
 - `nomeMaxCaracteres` — limite do nome do jogador.
 - `cenaEspecial` — arquivo e momento do vídeo (`usarEm`: "carregamento", "final",
   "antes-dos-creditos" ou null).

@@ -9,12 +9,18 @@ var TRILHA_EXPLORACAO = "passeio";
 document.addEventListener("DOMContentLoaded", function () {
   Interface.iniciar();
   Telas.abrirMenu(comecarJogo); // o menu já fica pronto por baixo da tela de abertura
-  Telas.abrirAbertura(function () {
+  Telas.abrirAbertura(escolherPersonagem);
+});
+
+// abertura -> escolha do personagem -> nome (dá pra voltar e trocar o personagem) -> menu
+function escolherPersonagem() {
+  EscolhaPersonagem.abrir(function () {
+    Telas.atualizarProtagonista();
     Telas.abrirNome(function () {
       CenaEspecial.mostrar("carregamento", function () {});
-    });
+    }, escolherPersonagem);
   });
-});
+}
 
 function comecarJogo() {
   estado.inicio = Date.now();

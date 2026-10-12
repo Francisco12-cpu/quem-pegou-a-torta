@@ -1203,3 +1203,799 @@ button.creditos-pessoa:focus-visible {
     align-items: flex-start;
   }
 }
+
+.nome-botoes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.9em;
+}
+
+/* ================= ESCOLHA DO PERSONAGEM (dados/protagonistas.js) ================= */
+
+#tela-escolha {
+  z-index: 76;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--roxo-noite);
+}
+
+/* fundo: o vídeo/GIF da chuva de estrelas (CONFIG.escolhaPersonagem). Enquanto carrega, ou
+   se o arquivo faltar, fica um céu noturno em CSS no lugar. */
+#escolha-fundo {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, #3d2766 0%, #1a1030 70%);
+}
+
+#escolha-fundo video,
+#escolha-fundo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: pixelated;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+#escolha-fundo.carregado video,
+#escolha-fundo.carregado img {
+  opacity: 1;
+}
+
+.escolha-veu {
+  background: radial-gradient(ellipse at 50% 50%, rgba(26, 16, 48, 0.35), rgba(26, 16, 48, 0.85) 80%);
+}
+
+.escolha-conteudo {
+  position: relative;
+  width: min(880px, 100%);
+  max-height: 100%;
+  overflow-y: auto;
+  padding: 16px 16px calc(16px + var(--margem-segura-baixo));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6em;
+  text-align: center;
+}
+
+.escolha-titulo {
+  margin-bottom: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.escolha-subtitulo {
+  color: var(--texto-suave);
+  font-size: 0.95em;
+  text-shadow: 0 2px 0 var(--roxo-noite);
+}
+
+.escolha-passo {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1em;
+  padding-top: 0.4em;
+  animation: escolha-entra 0.35s ease both;
+}
+
+.escolha-passo[hidden] {
+  display: none;
+}
+
+@keyframes escolha-entra {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---- passo 1: categorias ---- */
+
+.escolha-categorias {
+  display: flex;
+  justify-content: center;
+  gap: 1.4em;
+  width: 100%;
+}
+
+.escolha-categoria {
+  flex: 1 1 0;
+  max-width: 340px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35em;
+  padding: 1em 0.8em 0.9em;
+  border-radius: 12px;
+  background: linear-gradient(180deg, var(--roxo-medio) 0%, var(--roxo) 100%);
+  box-shadow: var(--moldura);
+  color: var(--texto);
+  cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
+}
+
+.escolha-categoria:hover,
+.escolha-categoria:focus-visible {
+  transform: translateY(-4px);
+  filter: brightness(1.12);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--roxo-noite), 0 0 0 5px var(--rosa), 0 0 0 8px var(--roxo-noite),
+    0 14px 34px rgba(0, 0, 0, 0.55);
+}
+
+.escolha-categoria:active {
+  transform: translateY(2px);
+}
+
+.escolha-categoria-poneis {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: 100%;
+  height: clamp(70px, 20vh, 150px);
+}
+
+.escolha-categoria-poneis img {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 38%;
+  height: 100%;
+  object-fit: contain;
+  object-position: bottom;
+  margin: 0 -2%;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.4));
+}
+
+.escolha-categoria-rotulo {
+  font-family: var(--fonte-titulo);
+  font-weight: 700;
+  font-size: 1.4em;
+  color: var(--dourado);
+  text-shadow: 0 3px 0 var(--roxo-noite);
+}
+
+.escolha-categoria-quantos {
+  font-size: 0.85em;
+  color: var(--texto-suave);
+}
+
+/* ---- passo 2: abas + cards ---- */
+
+.escolha-abas {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  background: rgba(26, 16, 48, 0.8);
+  box-shadow: 0 0 0 2px rgba(255, 212, 121, 0.5);
+}
+
+.escolha-aba {
+  min-height: 40px;
+  padding: 0.4em 1.3em;
+  border-radius: 999px;
+  font-family: var(--fonte-titulo);
+  font-weight: 700;
+  color: var(--texto-suave);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.escolha-aba:hover:not(.ativa),
+.escolha-aba:focus-visible:not(.ativa) {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  outline: none;
+}
+
+.escolha-aba.ativa {
+  color: #fff;
+  background: linear-gradient(180deg, #ff9ccd 0%, var(--rosa) 45%, var(--rosa-escuro) 100%);
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
+}
+
+.escolha-aba.ativa:focus-visible {
+  outline: 2px solid var(--creme);
+  outline-offset: 2px;
+}
+
+.escolha-cartoes {
+  display: flex;
+  justify-content: center;
+  gap: clamp(10px, 2.4vw, 26px);
+  width: 100%;
+  padding: 8px 4px 4px;
+}
+
+.escolha-cartao {
+  position: relative;
+  flex: 0 1 210px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.7em 0.5em 0.6em;
+  border-radius: 12px;
+  background: rgba(44, 27, 77, 0.88);
+  box-shadow: 0 0 0 3px var(--roxo-noite), 0 0 0 5px rgba(255, 212, 121, 0.3), 0 8px 18px rgba(0, 0, 0, 0.4);
+  color: var(--texto);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease, background 0.15s ease;
+  animation: escolha-cartao-entra 0.4s cubic-bezier(0.2, 1.3, 0.4, 1) both;
+}
+
+@keyframes escolha-cartao-entra {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.92);
+  }
+}
+
+.escolha-cartao-palco {
+  position: relative;
+  width: 100%;
+  height: clamp(90px, 26vh, 220px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+/* sombra no chão, embaixo da pônei */
+.escolha-cartao-palco::before {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 18%;
+  right: 18%;
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(0, 0, 0, 0.45), transparent 70%);
+}
+
+.escolha-cartao-palco img {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  object-fit: contain;
+  object-position: bottom;
+  image-rendering: pixelated;
+  transition: transform 0.2s ease;
+  -webkit-user-drag: none;
+}
+
+.escolha-cartao-nome {
+  margin-top: 0.4em;
+  font-family: var(--fonte-titulo);
+  font-weight: 700;
+  font-size: 1.05em;
+  transition: color 0.15s ease;
+}
+
+.escolha-cartao:hover,
+.escolha-cartao:focus-visible {
+  transform: translateY(-4px);
+  filter: brightness(1.1);
+  outline: none;
+}
+
+.escolha-cartao:hover .escolha-cartao-palco img {
+  transform: scale(1.04);
+}
+
+.escolha-cartao:focus-visible {
+  box-shadow: 0 0 0 3px var(--roxo-noite), 0 0 0 6px var(--rosa), 0 8px 18px rgba(0, 0, 0, 0.4);
+}
+
+.escolha-cartao.selecionado {
+  transform: translateY(-6px);
+  background: linear-gradient(180deg, var(--roxo-claro) 0%, var(--roxo-medio) 100%);
+  box-shadow: 0 0 0 3px var(--roxo-noite), 0 0 0 6px var(--dourado), 0 0 0 9px var(--roxo-noite),
+    0 0 30px rgba(255, 212, 121, 0.45), 0 12px 24px rgba(0, 0, 0, 0.45);
+}
+
+.escolha-cartao.selecionado:focus-visible {
+  box-shadow: 0 0 0 3px var(--roxo-noite), 0 0 0 6px var(--dourado), 0 0 0 9px var(--rosa),
+    0 0 30px rgba(255, 212, 121, 0.45), 0 12px 24px rgba(0, 0, 0, 0.45);
+}
+
+.escolha-cartao.selecionado .escolha-cartao-palco img {
+  animation: flutua 2.4s ease-in-out infinite;
+}
+
+.escolha-cartao.selecionado .escolha-cartao-nome {
+  color: var(--dourado);
+}
+
+/* selo de "marcado" no canto: círculo dourado com um visto desenhado em CSS */
+.escolha-cartao-marca {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--dourado);
+  box-shadow: 0 0 0 3px var(--roxo-noite);
+  opacity: 0;
+  transform: scale(0.4);
+  transition: opacity 0.15s ease, transform 0.2s cubic-bezier(0.2, 1.6, 0.4, 1);
+}
+
+.escolha-cartao-marca::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  top: 5px;
+  width: 7px;
+  height: 13px;
+  border-right: 4px solid var(--roxo-noite);
+  border-bottom: 4px solid var(--roxo-noite);
+  transform: rotate(45deg);
+}
+
+.escolha-cartao.selecionado .escolha-cartao-marca {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.escolha-cartao.confirmado {
+  animation: escolha-confirma 0.38s ease;
+}
+
+@keyframes escolha-confirma {
+  50% {
+    transform: translateY(-12px) scale(1.06);
+  }
+}
+
+.escolha-cartao.indisponivel {
+  cursor: not-allowed;
+  filter: grayscale(1) brightness(0.6);
+}
+
+.escolha-cartao.indisponivel:hover {
+  transform: none;
+  filter: grayscale(1) brightness(0.7);
+}
+
+.escolha-cartao-selo {
+  position: absolute;
+  top: 42%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-8deg);
+  padding: 0.2em 0.7em;
+  border-radius: 6px;
+  background: var(--roxo-noite);
+  box-shadow: 0 0 0 2px var(--dourado);
+  font-family: var(--fonte-titulo);
+  font-weight: 700;
+  font-size: 0.85em;
+  color: var(--dourado);
+  white-space: nowrap;
+}
+
+/* ---- ficha do escolhido + botões ---- */
+
+.escolha-ficha {
+  width: min(560px, 100%);
+  padding: 0.7em 1.2em 0.8em;
+}
+
+.escolha-ficha.trocou {
+  animation: escolha-ficha 0.3s ease;
+}
+
+@keyframes escolha-ficha {
+  from {
+    opacity: 0.4;
+    transform: translateY(6px);
+  }
+}
+
+.escolha-nome {
+  font-family: var(--fonte-titulo);
+  font-weight: 700;
+  font-size: 1.45em;
+  text-shadow: 0 3px 0 var(--roxo-noite);
+}
+
+.escolha-tracos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.35em 0.5em;
+  margin-top: 0.35em;
+}
+
+.escolha-tracos li {
+  padding: 0.15em 0.7em;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.09);
+  color: var(--creme);
+  font-size: 0.9em;
+}
+
+.escolha-botoes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.2em;
+  padding-bottom: 6px;
+}
+
+.escolha-botoes .botao:disabled {
+  opacity: 0.5;
+  cursor: default;
+  transform: none;
+}
+
+/* celular em pé: cards mais estreitos */
+@media (max-width: 520px) {
+  .escolha-categorias {
+    flex-direction: column;
+    align-items: center;
+    gap: 1.3em;
+  }
+  .escolha-categoria {
+    width: 100%;
+    flex: none;
+  }
+  .escolha-categoria-poneis {
+    height: clamp(70px, 15vh, 130px);
+  }
+  .escolha-categoria-rotulo {
+    font-size: 1.2em;
+  }
+  .escolha-cartao {
+    padding: 0.6em 0.3em 0.5em;
+  }
+  .escolha-cartao-palco {
+    height: clamp(80px, 17vh, 160px);
+  }
+  .escolha-cartao-marca {
+    top: -8px;
+    right: -6px;
+  }
+}
+
+/* celular deitado / tela baixa: tudo mais compacto pra caber sem rolar */
+@media (max-height: 520px) {
+  .escolha-conteudo {
+    gap: 0.3em;
+    padding-top: 8px;
+    padding-bottom: calc(8px + var(--margem-segura-baixo));
+  }
+  .escolha-titulo {
+    font-size: 1.25em;
+  }
+  .escolha-subtitulo {
+    display: none;
+  }
+  .escolha-passo {
+    gap: 0.55em;
+    padding-top: 0.2em;
+  }
+  .escolha-categoria-poneis {
+    height: 32vh;
+  }
+  .escolha-aba {
+    min-height: 34px;
+    padding: 0.25em 1.1em;
+  }
+  .escolha-cartoes {
+    padding-top: 6px;
+  }
+  .escolha-cartao {
+    flex-basis: 170px;
+    padding: 0.4em 0.4em 0.35em;
+  }
+  .escolha-cartao-palco {
+    height: 25vh;
+  }
+  .escolha-cartao-nome {
+    margin-top: 0.2em;
+  }
+  .escolha-ficha {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8em;
+    padding: 0.35em 1em;
+  }
+  .escolha-nome {
+    font-size: 1.15em;
+  }
+  .escolha-tracos {
+    margin-top: 0;
+  }
+  .escolha-botoes .botao {
+    min-height: 38px;
+    padding: 0.4em 1.4em;
+  }
+}
+
+/* ---- personagem secreto (dados/protagonistas.js, campo `secreto`) ---- */
+
+/* estrelinha ciano escondida entre as estrelas do vídeo; brilha mais a cada toque */
+#escolha-estrela {
+  --carga: 0;
+  position: absolute;
+  top: 7%;
+  left: 6%;
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  cursor: pointer;
+}
+
+#escolha-estrela[hidden] {
+  display: none;
+}
+
+#escolha-estrela::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(12px + var(--carga) * 10px);
+  height: calc(12px + var(--carga) * 10px);
+  transform: translate(-50%, -50%);
+  background: #8ff4ff;
+  clip-path: polygon(50% 0%, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0% 50%, 39% 39%);
+  filter: drop-shadow(0 0 calc(2px + var(--carga) * 8px) #5fe3f0);
+  animation: estrela-secreta 2.6s ease-in-out infinite;
+  transition: width 0.2s ease, height 0.2s ease;
+}
+
+#escolha-estrela.pulso::before {
+  animation: estrela-pulso 0.35s ease;
+}
+
+#escolha-estrela:focus-visible {
+  outline: 2px dashed rgba(143, 244, 255, 0.6);
+  border-radius: 50%;
+}
+
+@keyframes estrela-secreta {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+@keyframes estrela-pulso {
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.8) rotate(45deg);
+  }
+}
+
+/* card trancado: silhueta escura com contorno ciano, cadeado e "???" */
+.escolha-cartao.secreto {
+  cursor: help;
+  background: rgba(16, 24, 40, 0.9);
+  box-shadow: 0 0 0 3px var(--roxo-noite), 0 0 0 5px rgba(95, 227, 240, 0.35), 0 8px 18px rgba(0, 0, 0, 0.4);
+}
+
+.escolha-cartao.secreto .escolha-cartao-palco img {
+  filter: brightness(0) drop-shadow(0 0 2px rgba(95, 227, 240, 0.7));
+  opacity: 0.9;
+}
+
+.escolha-cartao.secreto .escolha-cartao-nome {
+  color: #5fe3f0;
+  letter-spacing: 0.15em;
+}
+
+.escolha-cartao-cadeado {
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  width: 22px;
+  height: 17px;
+  transform: translate(-50%, -20%);
+  border-radius: 3px;
+  background: #5fe3f0;
+  box-shadow: 0 0 10px rgba(95, 227, 240, 0.6);
+}
+
+.escolha-cartao-cadeado::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  bottom: 100%;
+  height: 11px;
+  border: 3px solid #5fe3f0;
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+}
+
+.escolha-cartao-cadeado::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 5px;
+  width: 4px;
+  height: 7px;
+  transform: translateX(-50%);
+  border-radius: 2px;
+  background: #102030;
+}
+
+/* balão com a dica, em cima do card trancado */
+.escolha-cartao-dica {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  z-index: 3;
+  width: max-content;
+  max-width: min(240px, 70vw);
+  transform: translateX(-50%);
+  padding: 0.45em 0.8em;
+  border-radius: 8px;
+  background: #102030;
+  box-shadow: 0 0 0 2px #5fe3f0, 0 8px 18px rgba(0, 0, 0, 0.5);
+  color: #bff8ff;
+  font-family: var(--fonte-titulo);
+  font-size: 0.85em;
+  line-height: 1.3;
+  pointer-events: none;
+  animation: escolha-entra 0.25s ease both;
+}
+
+.escolha-cartao-dica::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -7px;
+  border: 7px solid transparent;
+  border-top-color: #5fe3f0;
+}
+
+/* no último card da fileira o balão não sai da tela */
+.escolha-cartao:last-child .escolha-cartao-dica {
+  left: auto;
+  right: -6px;
+  transform: none;
+}
+.escolha-cartao:last-child .escolha-cartao-dica::after {
+  left: auto;
+  right: 24px;
+}
+
+/* recém-destravado: sai da silhueta pra cor, com um brilho ciano */
+.escolha-cartao.revelado .escolha-cartao-palco img {
+  animation: revela-secreto 1s ease, flutua 2.4s ease-in-out 1s infinite;
+}
+
+@keyframes revela-secreto {
+  0% {
+    filter: brightness(0) drop-shadow(0 0 2px #5fe3f0);
+  }
+  40% {
+    filter: brightness(3) drop-shadow(0 0 14px #5fe3f0);
+  }
+  100% {
+    filter: none;
+  }
+}
+
+/* efeito "hackeado" ao destravar: tela treme, linhas de varredura e o aviso com glitch */
+#escolha-hack {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: repeating-linear-gradient(0deg, rgba(95, 227, 240, 0.09) 0 2px, transparent 2px 5px),
+    rgba(6, 14, 24, 0.72);
+  color: #8ff4ff;
+  font-family: var(--fonte-titulo);
+  font-weight: 700;
+  font-size: clamp(1.6em, 6vmin, 3.4em);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-shadow: 0 0 12px rgba(95, 227, 240, 0.8);
+}
+
+#escolha-hack::before,
+#escolha-hack::after {
+  content: attr(data-texto);
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  text-align: center;
+  transform: translateY(-50%);
+  opacity: 0.8;
+}
+
+#escolha-hack::before {
+  color: #ff6fb0;
+  animation: glitch-a 0.3s steps(2) infinite;
+}
+
+#escolha-hack::after {
+  color: #5fe3f0;
+  animation: glitch-b 0.25s steps(2) infinite;
+}
+
+/* sem `fill`: com "movimento reduzido" a animação some e o aviso fica parado, visível */
+#tela-escolha.hackeando #escolha-hack {
+  display: flex;
+  animation: hack-aparece 1.5s ease;
+}
+
+#tela-escolha.hackeando .escolha-conteudo {
+  animation: tela-treme 0.18s steps(2) 6;
+}
+
+@keyframes hack-aparece {
+  0% {
+    opacity: 0;
+  }
+  10%,
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes glitch-a {
+  0% {
+    clip-path: inset(10% 0 55% 0);
+    transform: translate(-6px, -50%);
+  }
+  100% {
+    clip-path: inset(60% 0 8% 0);
+    transform: translate(5px, -50%);
+  }
+}
+
+@keyframes glitch-b {
+  0% {
+    clip-path: inset(50% 0 20% 0);
+    transform: translate(6px, -50%);
+  }
+  100% {
+    clip-path: inset(5% 0 70% 0);
+    transform: translate(-4px, -50%);
+  }
+}
+
+@keyframes tela-treme {
+  0% {
+    transform: translate(3px, -2px);
+    filter: hue-rotate(60deg);
+  }
+  100% {
+    transform: translate(-3px, 2px);
+    filter: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #tela-escolha.hackeando .escolha-conteudo,
+  #escolha-hack::before,
+  #escolha-hack::after {
+    animation: none;
+  }
+}

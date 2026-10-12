@@ -9,6 +9,8 @@ var CONFIG = {
   //              localhost). NUNCA aparece no GitHub Pages — os jogadores não veem.
   //   false   -> desligada em todo lugar (use na versão final, se quiser garantir).
   //   true    -> ligada em todo lugar (inclusive no site publicado — cuidado).
+  // Jogando com o personagem secreto (Audir, `modoCriador` em dados/protagonistas.js) ela
+  // aparece em qualquer lugar, com o nome "Modo criador" — é o prêmio de quem descobre.
   ferramentasDeTeste: "local",
 
   // ---------------------------------------------------------------------------------------
@@ -30,17 +32,31 @@ var CONFIG = {
   // `duracao`: segundos até fechar sozinha (0 = só fecha com um toque/tecla).
   cenaEspecial: {
     arquivo: "assets/especiais/chuva-de-estrelas.mp4",
-    usarEm: "carregamento",
+    usarEm: null, // a chuva de estrelas agora é o fundo da escolha de personagem (abaixo)
     titulo: "",
     texto: "",
     duracao: 4,
+  },
+
+  // ---------------------------------------------------------------------------------------
+  // ESCOLHA DE PERSONAGEM (tela depois da abertura — personagens em dados/protagonistas.js)
+  // `fundo`: animação de fundo da tela. Aceita .mp4/.webm (vídeo em loop, sem som; se o .mp4
+  // não tocar, tenta o .webm com o mesmo nome) ou .gif/.webp animado. Se o arquivo não
+  // existir, a tela usa um céu estrelado desenhado em CSS.
+  escolhaPersonagem: {
+    fundo: "assets/especiais/chuva-de-estrelas.mp4",
   },
 };
 
 // A ferramenta de teste está ligada neste lugar? (ver `ferramentasDeTeste` acima)
 function ferramentasDeTesteAtivas() {
-  if (CONFIG.ferramentasDeTeste === true) return true;
+  if (CONFIG.ferramentasDeTeste === true || modoCriadorAtivo()) return true;
   if (CONFIG.ferramentasDeTeste !== "local") return false;
   var host = window.location.hostname;
   return window.location.protocol === "file:" || host === "localhost" || host === "127.0.0.1" || host === "";
+}
+
+// Está jogando com o personagem secreto que libera o "Modo criador"?
+function modoCriadorAtivo() {
+  return typeof PERSONAGENS !== "undefined" && !!PERSONAGENS.protagonista.modoCriador;
 }

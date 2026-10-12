@@ -281,11 +281,12 @@ var Telas = (function () {
     tela.addEventListener("touchend", iniciar);
   }
 
-  // ---- escolha do nome da protagonista ----
-  // O nome vale pra sessão toda: vira o nome dela nos diálogos (PERSONAGENS.protagonista.nome)
+  // ---- escolha do nome do protagonista ----
+  // O nome vale pra sessão toda: vira o nome nos diálogos (PERSONAGENS.protagonista.nome)
   // e o {nome} das falas do narrador. Não é cadastro — nada é salvo além da aba aberta.
+  // aoTrocar (opcional): botão "Trocar personagem" volta pra escolha de personagem.
 
-  function abrirNome(aoConfirmar) {
+  function abrirNome(aoConfirmar, aoTrocar) {
     var tela = $("tela-nome");
     var form = $("nome-form");
     var campo = $("nome-campo");
@@ -299,6 +300,8 @@ var Telas = (function () {
     try {
       campo.value = window.sessionStorage.getItem("torta-nome") || "";
     } catch (e) {}
+    // personagem secreto já vem com o nome dele (dá pra apagar e trocar)
+    if (PERSONAGENS.protagonista.nomeSugerido) campo.value = PERSONAGENS.protagonista.nomeSugerido;
 
     function atualizarContador() {
       contador.textContent = Array.from(campo.value).length + "/" + Nome.limite();
@@ -343,6 +346,19 @@ var Telas = (function () {
       });
     };
 
+    var trocar = $("nome-trocar");
+    trocar.hidden = !aoTrocar;
+    trocar.onclick = function () {
+      if (enviando) return;
+      enviando = true;
+      Musica.efeito("interagir");
+      campo.blur();
+      Interface.transicao(function () {
+        tela.hidden = true;
+        aoTrocar();
+      });
+    };
+
     atualizarContador();
     aviso.hidden = true;
     tela.hidden = false;
@@ -356,16 +372,15 @@ var Telas = (function () {
 
   // ---- menu ----
 
+  var DESFILE_MENU = ["twilight", "rarity", "pinkie", "protagonista", "rainbow-dash", "fluttershy", "applejack"];
+
+  // o menu é montado antes da escolha de personagem: refaz o desfile com o escolhido
+  function atualizarProtagonista() {
+    montarDesfile($("tela-menu").querySelector(".desfile-poneis"), DESFILE_MENU);
+  }
+
   function abrirMenu(aoJogar) {
-    montarDesfile($("tela-menu").querySelector(".desfile-poneis"), [
-      "twilight",
-      "rarity",
-      "pinkie",
-      "protagonista",
-      "rainbow-dash",
-      "fluttershy",
-      "applejack",
-    ]);
+    montarDesfile($("tela-menu").querySelector(".desfile-poneis"), DESFILE_MENU);
     montarBrilhos($("tela-menu").querySelector(".brilhos"), 18);
     mostrar("tela-menu");
 
@@ -499,7 +514,7 @@ var Telas = (function () {
   function mostrarFim(completo, aoCreditos) {
 
     $("tela-fim-titulo").textContent = TEXTOS_FIM.titulo;
-    $("tela-fim-texto").textContent = completo ? TEXTOS_FIM.subtitulo100 : TEXTOS_FIM.subtitulo;
+    $("tela-fim-texto").textContent = textoDoProtagonista(completo ? TEXTOS_FIM.subtitulo100 : TEXTOS_FIM.subtitulo);
     $("tela-fim-selo").textContent = TEXTOS_FIM.selo100;
     $("tela-fim-selo").hidden = !completo;
 
@@ -543,6 +558,7 @@ var Telas = (function () {
   return {
     abrirAbertura: abrirAbertura,
     abrirNome: abrirNome,
+    atualizarProtagonista: atualizarProtagonista,
     abrirMenu: abrirMenu,
     abrirCaso: abrirCaso,
     abrirFim: abrirFim,

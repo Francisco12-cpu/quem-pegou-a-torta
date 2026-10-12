@@ -451,6 +451,131 @@ def preparar_protagonista():
     print("sprite   protagonista.png", base.size)
 
 
+# ---- protagonistas jogáveis (tela "Escolha seu personagem") ----
+# As artes vêm de folhas com fundo branco (assets/originais/ficha-protagonistas.png,
+# lavanda-e-caramelo.png e audir.png). Não são pixel art de grade regular (o "pixel" varia de tamanho),
+# então o recorte em grade distorceria o desenho: aqui o fundo é removido por máscara.
+#
+#   caixa    — retângulo (x0, y0, x1, y1) da pose grande na folha (sem o texto/paleta)
+#   escala   — as duas folhas foram desenhadas em tamanhos diferentes (pixel ~6 px na ficha,
+#              ~13 px na outra); a escala deixa todos do mesmo tamanho de pônei
+#   espelhar — o jogo espera sprites olhando pra esquerda
+#   frestas  — pontos (x, y) dentro da caixa onde há fundo branco preso entre a cauda e o
+#              corpo (o flood fill da borda não chega lá). Conferidos um por um: o branco dos
+#              olhos e a flor da Líria ficam.
+
+PROTAGONISTAS = {
+    "kael": ("ficha-protagonistas", (60, 65, 400, 490), 1.0, False, []),
+    "liria": ("ficha-protagonistas", (800, 95, 1160, 485), 1.0, False, [(265, 256), (220, 178)]),
+    "nyx": ("ficha-protagonistas", (65, 560, 410, 965), 1.0, False, [(254, 245), (250, 268)]),
+    "riven": ("ficha-protagonistas", (805, 550, 1150, 960), 1.0, False, []),
+    "lavanda": ("lavanda-e-caramelo", (60, 130, 720, 920), 0.5, True, [(305, 386)]),
+    "caramelo": ("lavanda-e-caramelo", (770, 130, 1480, 920), 0.5, False, []),
+    # personagem secreto (o criador) — pose grande da ficha assets/originais/audir.png
+    "audir": ("audir", (35, 160, 445, 670), 0.8, False, []),
+}
+TOLERANCIA_FUNDO_PROTAGONISTA = 30  # o cabelo da Nyx é lilás bem claro: mais que isso o come
+
+
+def componentes(mascara):
+    """Rotula os blocos conectados (4 vizinhos) de uma máscara booleana. Devolve a matriz de
+    rótulos e o tamanho de cada rótulo."""
+    h, w = mascara.shape
+    rotulo = np.zeros((h, w), dtype=np.int32)
+    tamanhos = [0]
+    plano = mascara.ravel()
+    rot = rotulo.ravel()
+    for inicio in np.flatnonzero(plano):
+        if rot[inicio]:
+            continue
+        atual = len(tamanhos)
+        rot[inicio] = atual
+        fila, tamanho = deque([inicio]), 0
+        while fila:
+            i = fila.popleft()
+            tamanho += 1
+            x = i % w
+            for j in (i - 1 if x > 0 else -1, i + 1 if x < w - 1 else -1, i - w, i + w):
+                if 0 <= j < w * h and plano[j] and not rot[j]:
+                    rot[j] = atual
+                    fila.append(j)
+        tamanhos.append(tamanho)
+    return rotulo, np.array(tamanhos)
+
+
+def recortar_protagonista(img, frestas):
+    """Silhueta com transparência real: fundo = branco ligado à borda + frestas indicadas; a
+    borda de 1 px que ainda mistura com o branco vira semitransparente e tem o branco
+    descontado da cor (sem halo claro sobre o cenário)."""
+    arr = np.array(img.convert("RGB")).astype(np.float32)
+    claro = (255 - arr).max(axis=2) <= TOLERANCIA_FUNDO_PROTAGONISTA
+    rotulo, _ = componentes(claro)
+    h, w = claro.shape
+    borda = set(np.unique(np.concatenate([rotulo[0], rotulo[-1], rotulo[:, 0], rotulo[:, -1]])))
+    for fx, fy in frestas:  # tudo que for claro num raio de 12 px do ponto
+        perto = rotulo[max(0, fy - 12) : fy + 13, max(0, fx - 12) : fx + 13]
+        borda.update(np.unique(perto[perto > 0]))
+    borda.discard(0)
+    fundo = np.isin(rotulo, list(borda))
+
+    # só o maior bloco não-fundo (descarta o símbolo de gênero e sujeira da folha)
+    rot_ponei, tam = componentes(~fundo)
+    tam[0] = 0
+    ponei = rot_ponei == tam.argmax()
+
+    alfa = ponei.astype(np.float32)
+    vizinho_fundo = np.zeros_like(ponei)
+    vizinho_fundo[1:] |= ~ponei[:-1]
+    vizinho_fundo[:-1] |= ~ponei[1:]
+    vizinho_fundo[:, 1:] |= ~ponei[:, :-1]
+    vizinho_fundo[:, :-1] |= ~ponei[:, 1:]
+    # pixel do contorno = mistura do traço (vizinho de dentro mais escuro) com o branco:
+    # herda a cor do traço e a transparência sai da proporção da mistura
+    contorno = ponei & vizinho_fundo
+    escuridao = (255 - arr).max(axis=2)
+    cor = arr.copy()
+    for y, x in zip(*np.nonzero(contorno)):
+        y0, x0 = max(0, y - 1), max(0, x - 1)
+        janela = ponei[y0 : y + 2, x0 : x + 2] & ~contorno[y0 : y + 2, x0 : x + 2]
+        if not janela.any():
+            janela = ponei[y0 : y + 2, x0 : x + 2]
+        esc = np.where(janela, escuridao[y0 : y + 2, x0 : x + 2], -1)
+        vy, vx = np.unravel_index(esc.argmax(), esc.shape)
+        tinta = esc[vy, vx]
+        if tinta > escuridao[y, x]:
+            cor[y, x] = arr[y0 + vy, x0 + vx]
+            alfa[y, x] = escuridao[y, x] / tinta
+    alfa[contorno & (alfa < 0.25)] = 0
+
+    rgba = np.dstack([cor, alfa * 255]).round().astype(np.uint8)
+    rgba[~ponei] = 0
+    ys, xs = np.nonzero(ponei)
+    return Image.fromarray(rgba[ys.min() : ys.max() + 1, xs.min() : xs.max() + 1], "RGBA")
+
+
+def preparar_protagonistas():
+    """Gera assets/sprites/protagonistas/<id>.png. Todos têm a MESMA altura de imagem
+    (pônei alinhada embaixo): o CSS desenha os sprites com altura fixa, então é isso que deixa
+    a escala igual entre eles na tela de escolha e no jogo."""
+    pasta = DESTINO / "sprites" / "protagonistas"
+    pasta.mkdir(parents=True, exist_ok=True)
+    recortes = {}
+    for nome, (original, caixa, escala, espelhar, frestas) in PROTAGONISTAS.items():
+        sprite = recortar_protagonista(abrir_original(original).crop(caixa), frestas)
+        if escala != 1:
+            tamanho = (round(sprite.width * escala), round(sprite.height * escala))
+            sprite = sprite.convert("RGBa").resize(tamanho, Image.LANCZOS).convert("RGBA")
+        if espelhar:
+            sprite = sprite.transpose(Image.FLIP_LEFT_RIGHT)
+        recortes[nome] = sprite
+    altura = max(s.height for s in recortes.values())
+    for nome, sprite in recortes.items():
+        tela = Image.new("RGBA", (sprite.width, altura), (0, 0, 0, 0))
+        tela.paste(sprite, (0, altura - sprite.height))
+        tela.save(pasta / (nome + ".png"), optimize=True)
+        print("sprite  ", "protagonistas/" + nome + ".png", tela.size)
+
+
 # ---- ícones pixel art ----
 # Cada ícone é uma grade de texto; cada caractere é uma cor da paleta ("." = transparente).
 
@@ -680,6 +805,7 @@ def preparar_icones():
 if __name__ == "__main__":
     preparar_sprites()
     preparar_protagonista()
+    preparar_protagonistas()
     preparar_cenarios()
     preparar_torta()
     preparar_icones()

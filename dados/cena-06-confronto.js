@@ -96,7 +96,7 @@ var CENA_06_CONFRONTO = {
       id: "confronto-chega",
       quemFala: "protagonista",
       texto:
-        "CHEGA! Nós passamos o dia inteiro procurando a torta e, em vez de tentar resolver o problema juntas, estamos começando a culpar umas às outras. Não temos provas de que qualquer uma de vocês pegou a torta. Se continuarmos brigando, não vamos encontrar solução nenhuma.",
+        "CHEGA! Nós passamos o dia inteiro procurando a torta e, em vez de tentar resolver o problema {juntas|juntos}, estamos começando a culpar {umas às outras|uns aos outros}. Não temos provas de que qualquer uma de vocês pegou a torta. Se continuarmos brigando, não vamos encontrar solução nenhuma.",
     },
     { quemFala: "twilight", lado: "esquerda", texto: "Você tem razão." },
     { quemFala: "rarity", lado: "direita", texto: "Eu me deixei levar." },

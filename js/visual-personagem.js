@@ -8,3 +8,14 @@ function htmlVisualPersonagem(p) {
   }
   return '<div class="bloco-cor" style="background:' + p.cor + '"></div>';
 }
+
+// Textos que dependem do protagonista escolhido: {nome} vira o nome que o jogador digitou, e
+// {feminino|masculino} escolhe a palavra pelo personagem (ex.: "fizemos {juntas|juntos}").
+function textoDoProtagonista(texto) {
+  var p = PERSONAGENS.protagonista;
+  return String(texto)
+    .replace(/\{nome\}/g, p.nome)
+    .replace(/\{([^{}|]*)\|([^{}|]*)\}/g, function (_, feminino, masculino) {
+      return p.genero === "masculino" ? masculino : feminino;
+    });
+}

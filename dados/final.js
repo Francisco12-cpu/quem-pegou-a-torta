@@ -29,6 +29,6 @@ var TEXTO_PISTAS = {
 var TEXTOS_FIM = {
   titulo: "Missão cumprida!",
   subtitulo: "O mistério da torta foi resolvido — e a amizade saiu mais forte.",
-  subtitulo100: "Com os quatro ingredientes, a festa ganhou uma torta nova, feita por todas juntas.",
+  subtitulo100: "Com os quatro ingredientes, a festa ganhou uma torta nova, feita por {todas juntas|todos juntos}.",
   selo100: "100% completo",
 };
