@@ -356,6 +356,65 @@ def recortar_transparente(img):
     return img.crop(img.getbbox())
 
 
+def limpar_sprite(sprite):
+    """Acabamento do sprite reconstruído (1 px = 1 "pixel" do desenho):
+    - tira a sombra cinza do chão que veio na foto (o jogo já desenha sombra por CSS, e os
+      protagonistas não têm) — cinza neutro ligado à base, só nas linhas de baixo;
+    - tira a franja clara da compressão JPG: pixel da borda bem mais claro que os vizinhos
+      de dentro (ex.: o contorno verde-água em volta da crina da Rainbow);
+    - tira pixels soltos."""
+    a = np.array(sprite.convert("RGBA"))
+    h, w = a.shape[:2]
+    rgb = a[:, :, :3].astype(int)
+    opaco = a[:, :, 3] > 0
+
+    media = rgb.mean(axis=2)
+    neutro = opaco & (rgb.max(axis=2) - rgb.min(axis=2) < 14) & (media > 120) & (media < 215)
+    sombra = np.zeros((h, w), dtype=bool)
+    fila = deque((y, x) for y in range(h - 3, h) for x in range(w) if neutro[y, x])
+    while fila:
+        y, x = fila.popleft()
+        if sombra[y, x] or not neutro[y, x] or y < h * 0.8:
+            continue
+        sombra[y, x] = True
+        for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            if 0 <= y + dy < h and 0 <= x + dx < w:
+                fila.append((y + dy, x + dx))
+    a[sombra] = 0
+    opaco &= ~sombra
+
+    def vizinhos(mascara):
+        p = np.pad(mascara, 1)
+        return sum(
+            p[1 + dy : h + 1 + dy, 1 + dx : w + 1 + dx].astype(int)
+            for dy in (-1, 0, 1)
+            for dx in (-1, 0, 1)
+            if (dy, dx) != (0, 0)
+        )
+
+    luz = rgb[:, :, 0] * 0.299 + rgb[:, :, 1] * 0.587 + rgb[:, :, 2] * 0.114
+    borda = opaco & (vizinhos(opaco) < 8)
+    franja = []
+    for y, x in zip(*np.nonzero(borda)):
+        dentro = [
+            luz[j, i]
+            for j in range(max(0, y - 1), min(h, y + 2))
+            for i in range(max(0, x - 1), min(w, x + 2))
+            if opaco[j, i] and not borda[j, i]
+        ]
+        if dentro and luz[y, x] - max(dentro) > 40:
+            franja.append((y, x))
+    for y, x in franja:
+        a[y, x] = 0
+        opaco[y, x] = False
+
+    solto = opaco & (vizinhos(opaco) <= 1)
+    a[solto] = 0
+
+    ys, xs = np.nonzero(a[:, :, 3])
+    return Image.fromarray(a[ys.min() : ys.max() + 1, xs.min() : xs.max() + 1], "RGBA")
+
+
 def preparar_sprites():
     pasta = DESTINO / "sprites"
     pasta.mkdir(parents=True, exist_ok=True)
@@ -370,6 +429,8 @@ def preparar_sprites():
             if sprite is None:
                 sprite = recortar_sem_fundo(img, tolerancia=28)
                 metodo = "simples"
+            else:
+                sprite = limpar_sprite(sprite)
         # ampliação por número inteiro, sem borrar (NEAREST): cada pixel vira um quadrado
         fator = max(1, round(ALTURA_SPRITE / sprite.height))
         sprite = sprite.resize((sprite.width * fator, sprite.height * fator), Image.NEAREST)
