@@ -58,19 +58,39 @@ function comecarMundo3D() {
     });
 }
 
-function interagirNoMundo(mundo, ponto) {
-  var tela = TELAS.filter(function (t) {
-    return t.id === ponto.tela;
+function telaPorId(id) {
+  return TELAS.filter(function (t) {
+    return t.id === id;
   })[0];
-  var cena = cenaDaPonei(tela, ponto);
+}
+
+function interagirNoMundo(mundo, ponto) {
+  function voltarProMundo() {
+    Interface.transicao(function () {
+      Musica.trilha(TRILHA_EXPLORACAO);
+      mundo.retomar();
+    });
+  }
+
+  if (ponto.tipo === "bau") {
+    var bau = BAUS[idDoBau(ponto)];
+    var config = Object.assign({}, bau, { fundo: telaPorId(bau.casa).fundo });
+    Interface.transicao(function () {
+      mundo.esconder();
+      MotorMinigame.iniciar(config, function () {
+        if (estado.ingredientes.indexOf(bau.ingrediente) !== -1) mundo.removerPonto(ponto.id);
+        voltarProMundo();
+      });
+    });
+    return;
+  }
+
+  var cena = cenaDaPonei(telaPorId(ponto.tela), ponto);
   Interface.transicao(function () {
     mundo.esconder();
     MotorDialogo.iniciarCena(cena, function () {
       estado.conversou[ponto.id] = true;
-      Interface.transicao(function () {
-        Musica.trilha(TRILHA_EXPLORACAO);
-        mundo.retomar();
-      });
+      voltarProMundo();
     });
   });
 }

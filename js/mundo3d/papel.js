@@ -79,7 +79,7 @@ export class Folha {
   }
 
   disco(raio, cor, x = 0, y = 0, z = 0) {
-    const malha = new THREE.Mesh(new THREE.CircleGeometry(raio, 28), this.material(cor, 1, true));
+    const malha = new THREE.Mesh(new THREE.CircleGeometry(raio, 96), this.material(cor, 1, true));
     malha.position.set(x, y, z);
     return malha;
   }

@@ -50,7 +50,7 @@ function recortarAdesivo(imagem) {
   return { canvas, sobraEmbaixo: (height - 1 - base) / height };
 }
 
-function criarSombra(raio) {
+export function criarSombra(raio) {
   const canvas = document.createElement("canvas");
   canvas.width = canvas.height = 64;
   const g = canvas.getContext("2d");

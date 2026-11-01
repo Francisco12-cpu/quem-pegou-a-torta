@@ -3,6 +3,7 @@
 import * as THREE from "../vendor/three.min.js";
 import { criarCasa } from "./casas-papel.js";
 import { dentroDaCaixa } from "./colisao.js";
+import { Folha } from "./papel.js";
 
 const FOLGA_FLORES = 1.8; // nenhum tufo nasce colado na casa nem na frente da porta
 
@@ -160,7 +161,11 @@ function criarTufos(dados, casas) {
 
   const m = new THREE.Matrix4();
   porTipo.forEach((todos, tipo) => {
-    const lista = todos.filter((t) => !casas.some((c) => dentroDaCaixa(t.x, t.z, c, FOLGA_FLORES)));
+    const lista = todos.filter(
+      (t) =>
+        !casas.some((c) => dentroDaCaixa(t.x, t.z, c, FOLGA_FLORES)) &&
+        !dados.areas.some((a) => a.chao && Math.hypot(t.x - a.x, t.z - a.z) < a.raio + 0.6)
+    );
     if (!lista.length) return;
     const malha = new THREE.InstancedMesh(geometrias[tipo], material, lista.length);
     lista.forEach((t, i) => {
@@ -173,10 +178,25 @@ function criarTufos(dados, casas) {
   return grupo;
 }
 
+// chão recortado de uma área (a praça): dois círculos de cartolina deitados
+function criarChaoDeArea(area) {
+  const f = new Folha();
+  const grupo = new THREE.Group();
+  const borda = f.disco(area.raio, area.corBorda);
+  const miolo = f.disco(area.raio * 0.86, area.chao, 0, 0, 0.012);
+  grupo.add(borda, miolo);
+  grupo.rotation.x = -Math.PI / 2;
+  grupo.position.set(area.x, 0.012, area.z);
+  return grupo;
+}
+
 // devolve as casas criadas (motor usa pra colisão e portas)
 export function construirMundo(cena, dados) {
   const casas = dados.casas.map(criarCasa);
   cena.add(criarChao(dados), criarTufos(dados, casas));
   casas.forEach((c) => cena.add(c.grupo));
+  dados.areas.forEach((a) => {
+    if (a.chao) cena.add(criarChaoDeArea(a));
+  });
   return casas;
 }

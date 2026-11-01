@@ -38,8 +38,17 @@ var MUNDO3D = {
 
   raioColisaoCasa: 0.9, // folga entre a protagonista e as paredes
 
-  // pôneis soltas no mundo. `tela` = id em dados/casas.js de onde vêm o diálogo e a fala repetida.
-  pontos: [],
+  raioColisaoBau: 1.3,
+
+  // Áreas com nome: ao entrar a pé aparece a plaquinha do lugar. `chao` (opcional) desenha um
+  // círculo de cartolina no chão, com a borda em `corBorda`.
+  areas: [{ nome: "Praça de Ponyville", x: -24, z: -12, raio: 11, chao: "#efe2c6", corBorda: "#d8c39c" }],
+
+  // o que fica solto no mundo:
+  //   tipo "ponei" — `tela` = id em dados/casas.js de onde vêm o diálogo e a fala repetida
+  //   tipo "bau"   — `bau` = chave em dados/baus.js
+  // O baú da Twilight fica na praça só até a biblioteca existir (etapa 5).
+  pontos: [{ id: "bau-twilight", tipo: "bau", bau: "twilight", x: -24, z: -13 }],
 
   // As casas: mude `x`, `z` e `giro` para colocá-las onde quiser, sem mexer no motor.
   //   tipo     — desenho da casa (funções em js/mundo3d/casas-papel.js)

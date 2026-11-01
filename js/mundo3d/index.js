@@ -6,6 +6,7 @@
 //   { nome, cena, camera, limites, pontos: [{ dados, ponei? }], casas: [] }
 
 import * as THREE from "../vendor/three.min.js";
+import { BauPapel } from "./bau-papel.js";
 import { atualizarOpacidade } from "./casas-papel.js";
 import { criarCenaAberta, criarPalco } from "./cena.js";
 import { empurrarDeCaixa, empurrarDeCirculo } from "./colisao.js";
@@ -17,7 +18,9 @@ import { PoneiPapel, carregarImagem } from "./ponei-papel.js";
 const dados = MUNDO3D;
 const DT_MAXIMO = 0.05; // aba parada não faz a pônei teleportar
 const ESPERA_INICIAL_MS = 250; // a tecla/clique que fechou o diálogo não reabre nada aqui
-const TEXTOS = { ponei: "Conversar", porta: "Entrar", saida: "Sair" };
+const TEXTOS = { ponei: "Conversar", bau: "Abrir baú", porta: "Entrar", saida: "Sair" };
+const ALTURA_BALAO_BAU = 2.6;
+const MARGEM_SAIDA_AREA = 1.2; // só vale sair da área um pouco além da borda (evita piscar)
 
 let el = null;
 let palco = null;
@@ -27,6 +30,7 @@ let spriteAtual = null;
 let mundoAberto = null;
 let lugar = null;
 let pontoPerto = null;
+let areaAtual = null;
 let aoInteragir = null;
 let ativo = false;
 let inicioTela = 0;
@@ -52,7 +56,13 @@ function montar() {
   el.balao.addEventListener("click", interagir);
 }
 
-async function criarPonei(dadosPonto, cena) {
+// pônei ou baú, conforme `tipo`
+async function criarPonto(dadosPonto, cena) {
+  if (dadosPonto.tipo === "bau") {
+    const bau = new BauPapel(dadosPonto.x, dadosPonto.z, dadosPonto.giro);
+    cena.add(bau.grupo);
+    return { dados: dadosPonto, bau };
+  }
   const imagem = await carregarImagem(PERSONAGENS[dadosPonto.id].sprite);
   const ponei = new PoneiPapel(imagem, dados.alturaPonei);
   ponei.grupo.position.set(dadosPonto.x, 0, dadosPonto.z);
@@ -64,7 +74,7 @@ async function criarLugarInterior(casa, mundo) {
   const interior = casa.dados.interior;
   const sala = dados.interior;
   const cena = criarInterior(await carregarImagem(interior.fundo), sala, interior);
-  const poneis = await Promise.all(interior.pontos.map((p) => criarPonei(p, cena)));
+  const pontos = await Promise.all(interior.pontos.map((p) => criarPonto(p, cena)));
   const lugarInterno = {
     nome: interior.nome,
     cena,
@@ -72,7 +82,7 @@ async function criarLugarInterior(casa, mundo) {
     limites: sala.limites,
     casas: [],
     entrada: sala.entrada,
-    pontos: poneis,
+    pontos,
   };
   lugarInterno.pontos.push({
     dados: { tipo: "saida", x: sala.saida.x, z: sala.saida.z, raio: sala.saida.raio, destino: mundo, chegada: casa.saida },
@@ -91,7 +101,7 @@ async function criarMundo() {
     limites: { minX: -metade, maxX: metade, minZ: -metade, maxZ: metade },
     casas,
     entrada: dados.inicio,
-    pontos: await Promise.all(dados.pontos.map((p) => criarPonei(p, cena))),
+    pontos: await Promise.all(dados.pontos.map((p) => criarPonto(p, cena))),
   };
   const portas = await Promise.all(
     casas.map(async (casa) => ({
@@ -154,6 +164,7 @@ function moverJogador(dt) {
   lugar.casas.forEach((c) => empurrarDeCaixa(jogador, c, dados.raioColisaoCasa));
   lugar.pontos.forEach((p) => {
     if (p.ponei) empurrarDeCirculo(jogador, p.dados.x, p.dados.z, dados.raioColisao);
+    if (p.bau) empurrarDeCirculo(jogador, p.dados.x, p.dados.z, dados.raioColisaoBau);
   });
 
   const l = lugar.limites;
@@ -188,10 +199,23 @@ function atualizarPontoPerto() {
 function posicionarBalao() {
   if (!pontoPerto) return;
   const d = pontoPerto.dados;
-  const altura = d.altura || (pontoPerto.ponei ? dados.alturaPonei + 0.5 : 1.6);
+  let altura = d.altura || 1.6;
+  if (pontoPerto.ponei) altura = dados.alturaPonei + 0.5;
+  if (pontoPerto.bau) altura = ALTURA_BALAO_BAU;
   naTela.set(d.x, altura, d.z).project(palco.camera);
   el.balao.style.left = ((naTela.x + 1) / 2) * el.overlay.clientWidth + "px";
   el.balao.style.top = ((1 - naTela.y) / 2) * el.overlay.clientHeight + "px";
+}
+
+function atualizarArea() {
+  if (lugar !== mundoAberto) return;
+  const distancia = (a) => Math.hypot(a.x - jogador.x, a.z - jogador.z);
+  if (areaAtual) {
+    if (distancia(areaAtual) > areaAtual.raio * MARGEM_SAIDA_AREA) areaAtual = null;
+    return;
+  }
+  areaAtual = dados.areas.find((a) => distancia(a) < a.raio) || null;
+  if (areaAtual) Interface.mostrarPlaca(areaAtual.nome);
 }
 
 function atualizar(dt) {
@@ -201,7 +225,9 @@ function atualizar(dt) {
   protagonista.atualizar(dt, jogador.vx, jogador.vz, dados.velocidade, palco.camera);
 
   atualizarPontoPerto();
+  atualizarArea();
   lugar.pontos.forEach((p) => {
+    if (p.bau) p.bau.atualizar(dt, p === pontoPerto);
     if (!p.ponei) return;
     if (p === pontoPerto) p.ponei.olharPara(jogador.x);
     p.ponei.atualizar(dt, 0, 0, dados.velocidade, palco.camera);
@@ -224,7 +250,7 @@ function interagir() {
   if (!ativo || !pontoPerto) return;
   if (performance.now() - inicioTela < ESPERA_INICIAL_MS) return;
   const ponto = pontoPerto.dados;
-  if (ponto.tipo !== "ponei") {
+  if (ponto.destino) {
     atravessar(ponto);
     return;
   }
@@ -256,9 +282,22 @@ export async function iniciar(opcoes) {
   ligar();
 }
 
-// volta de um diálogo: a protagonista continua onde estava
+// volta de um diálogo ou do baú: a protagonista continua onde estava
 export function retomar() {
   ligar();
+}
+
+// tira um ponto do lugar atual (baú já aberto some do mapa, como no 2D)
+export function removerPonto(id) {
+  const p = lugar.pontos.find((q) => q.dados.id === id);
+  if (!p) return;
+  lugar.pontos.splice(lugar.pontos.indexOf(p), 1);
+  (p.bau || p.ponei).grupo.removeFromParent();
+  if (pontoPerto === p) {
+    pontoPerto = null;
+    el.balao.hidden = true;
+    el.acao.hidden = true;
+  }
 }
 
 export function parar() {
