@@ -248,10 +248,56 @@ function celeiro(f, dadosCasa) {
 
 const TIPOS = { confeitaria, biblioteca, boutique, nuvem, chale, celeiro };
 
+// degrau na porta e dois arbustos: assenta a casa no chão
+function entrada(f, grupo, profundidade) {
+  const frente = profundidade / 2;
+  grupo.add(
+    f.caixa(3.2, 0.2, 1.1, "#d8c39c", 0, 0.1, frente + 0.55),
+    f.esfera(0.75, "#5da84c", -2.5, 0.55, frente + 0.5),
+    f.esfera(0.5, "#86d06c", -2.1, 0.75, frente + 0.8),
+    f.esfera(0.75, "#5da84c", 2.5, 0.55, frente + 0.5),
+    f.esfera(0.5, "#86d06c", 2.9, 0.75, frente + 0.8)
+  );
+}
+
+// a casinha da vila: o modelo mais simples possível, muda só a cor. Não tem porta de verdade.
+const LARGURA_CASINHA = 6;
+const PROFUNDIDADE_CASINHA = 5;
+
+export function criarCasinha(d) {
+  const f = new Folha();
+  const frente = PROFUNDIDADE_CASINHA / 2;
+  const grupo = new THREE.Group();
+  grupo.add(
+    f.caixa(LARGURA_CASINHA, 3.4, PROFUNDIDADE_CASINHA, d.parede, 0, 1.7, 0),
+    f.prisma(LARGURA_CASINHA + 0.9, 2.3, PROFUNDIDADE_CASINHA + 0.7, d.telhado, 0, 3.4, 0),
+    f.arco(1.5, 2.3, d.telhado, -1.2, 0.02, frente + 0.02),
+    f.caixa(1.5, 1.3, 0.05, "#fff3dc", 1.3, 1.9, frente),
+    f.caixa(1.2, 1, 0.05, "#bfe8ff", 1.3, 1.9, frente + 0.03)
+  );
+  const giro = THREE.MathUtils.degToRad(d.giro || 0);
+  const materiais = fundirPecas(grupo);
+  grupo.position.set(d.x, 0, d.z);
+  grupo.rotation.y = giro;
+  return {
+    dados: d,
+    grupo,
+    x: d.x,
+    z: d.z,
+    giro,
+    meiaLargura: LARGURA_CASINHA / 2,
+    meiaProfundidade: PROFUNDIDADE_CASINHA / 2,
+    altura: 6,
+    materiais,
+    opacidade: 1,
+  };
+}
+
 // dadosCasa: item de MUNDO3D.casas
 export function criarCasa(dadosCasa) {
   const folha = new Folha();
   const { grupo, largura, profundidade } = TIPOS[dadosCasa.tipo](folha, dadosCasa);
+  if (dadosCasa.tipo !== "nuvem") entrada(folha, grupo, profundidade);
   const giro = THREE.MathUtils.degToRad(dadosCasa.giro || 0);
   const materiais = fundirPecas(grupo);
 

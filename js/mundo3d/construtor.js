@@ -1,7 +1,7 @@
 // construtor.js — monta o cenário a partir de dados/mundo3d.js, todo gerado por código.
 
 import * as THREE from "../vendor/three.min.js";
-import { criarCasa } from "./casas-papel.js";
+import { criarCasa, criarCasinha } from "./casas-papel.js";
 import { dentroDaCaixa } from "./colisao.js";
 import {
   criarArvores,
@@ -175,10 +175,11 @@ function criarChaoDeArea(area) {
 // setores de flores e árvores (ele esconde os que estiverem muito longe)
 export function construirMundo(cena, dados) {
   const casas = dados.casas.map(criarCasa);
+  const casinhas = dados.vila.map(criarCasinha);
 
   // (x, z) está livre de casa, praça e caminho?
   const livre = (x, z, folga) =>
-    !casas.some((c) => dentroDaCaixa(x, z, c, folga)) &&
+    ![...casas, ...casinhas].some((c) => dentroDaCaixa(x, z, c, folga)) &&
     !dados.areas.some((a) => a.chao && Math.hypot(x - a.x, z - a.z) < a.raio + folga) &&
     !pertoDeCaminho(x, z, dados.caminhos, folga * 0.5);
 
@@ -188,12 +189,12 @@ export function construirMundo(cena, dados) {
 
   cena.add(criarChao(dados), criarCaminhos(dados.caminhos), criarFaixaDeArvores(dados));
   cena.add(criarMorros(dados.morros), criarFonte(dados.fonte));
-  casas.forEach((c) => cena.add(c.grupo));
+  [...casas, ...casinhas].forEach((c) => cena.add(c.grupo));
   dados.areas.forEach((a) => {
     if (a.chao) cena.add(criarChaoDeArea(a));
   });
 
   const solidos = arvores.map((a) => ({ x: a.x, z: a.z, raio: dados.arvores.raioColisao }));
   solidos.push({ x: dados.fonte.x, z: dados.fonte.z, raio: dados.fonte.raio + 0.8 });
-  return { casas, solidos, setores, nuvens: criarNuvens(dados.nuvens, cena, dados.tamanho) };
+  return { casas, casinhas, solidos, setores, nuvens: criarNuvens(dados.nuvens, cena, dados.tamanho) };
 }

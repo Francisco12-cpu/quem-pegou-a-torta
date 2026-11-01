@@ -375,6 +375,26 @@ var MUNDO3D = {
     },
   ],
 
+  // As casinhas da vila: enfeite (não abrem), todas iguais, mudando só as cores e o lugar.
+  // `giro` em graus: 0 = de frente para a câmera.
+  vila: [
+    { x: -14, z: 36, giro: 15, parede: "#ffe0b8", telhado: "#d9574f" },
+    { x: -27, z: 42, giro: -10, parede: "#cfe8ff", telhado: "#4a7fd0" },
+    { x: -42, z: 34, giro: 20, parede: "#ffd6e6", telhado: "#c94f8a" },
+    { x: -14, z: 21, giro: -15, parede: "#e2f2c4", telhado: "#5f9e4a" },
+    { x: -49, z: 12, giro: 25, parede: "#fff0b8", telhado: "#d98a2f" },
+    { x: 31, z: 44, giro: -15, parede: "#e6d6f7", telhado: "#7f5bc2" },
+    { x: 44, z: 28, giro: -25, parede: "#ffe0b8", telhado: "#3f9a8c" },
+    { x: 37, z: 10, giro: -20, parede: "#d6f2e6", telhado: "#d9574f" },
+    { x: 49, z: -8, giro: -30, parede: "#ffd6e6", telhado: "#4a7fd0" },
+    { x: 30, z: -1, giro: -10, parede: "#fff0b8", telhado: "#7f5bc2" },
+    { x: -21, z: -26, giro: 10, parede: "#cfe8ff", telhado: "#d98a2f" },
+    { x: -27, z: -44, giro: 15, parede: "#ffe0b8", telhado: "#c94f8a" },
+    { x: -49, z: -46, giro: 20, parede: "#e2f2c4", telhado: "#d9574f" },
+    { x: 0, z: -47, giro: 0, parede: "#e6d6f7", telhado: "#3f9a8c" },
+    { x: 37, z: -53, giro: -10, parede: "#fff0b8", telhado: "#5f9e4a" },
+  ],
+
   // medidas comuns das salas (largura e fundoZ podem mudar em cada casa)
   salaPapel: {
     largura: 20,

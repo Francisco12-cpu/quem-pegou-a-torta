@@ -178,7 +178,7 @@ async function criarMundo() {
     cena,
     camera: dados.camera,
     limites: { minX: -metade, maxX: metade, minZ: -metade, maxZ: metade },
-    casas: construido.casas,
+    casas: [...construido.casas, ...construido.casinhas],
     caixas: [],
     solidos: construido.solidos,
     entrada: dados.inicio,
