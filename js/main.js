@@ -6,7 +6,11 @@
 
 var TRILHA_EXPLORACAO = "passeio";
 
+var carregandoMundo3D = null; // Promise do módulo js/mundo3d/ (só no modo 3D)
+
 document.addEventListener("DOMContentLoaded", function () {
+  // começa a baixar já no menu: ao apertar "Jogar" o mundo costuma estar pronto
+  if (modoDeJogo() === "3d") carregandoMundo3D = import("./mundo3d/index.js");
   Interface.iniciar();
   Telas.abrirMenu(comecarJogo); // o menu já fica pronto por baixo da tela de abertura
   Telas.abrirAbertura(escolherPersonagem);
@@ -25,7 +29,28 @@ function escolherPersonagem() {
 function comecarJogo() {
   estado.inicio = Date.now();
   Musica.trilha(TRILHA_EXPLORACAO);
+  if (carregandoMundo3D) {
+    comecarMundo3D();
+    return;
+  }
   entrarNaTela(0, "esquerda");
+}
+
+// Se o 3D não puder rodar (sem WebGL, ou abrindo o arquivo direto sem servidor), segue no 2D.
+function comecarMundo3D() {
+  carregandoMundo3D
+    .then(function (mundo) {
+      return mundo.iniciar({ sprite: PERSONAGENS.protagonista.sprite });
+    })
+    .then(function () {
+      Interface.mostrarHud(true);
+      Interface.mostrarPlaca(MUNDO3D.nome);
+    })
+    .catch(function (erro) {
+      console.warn("Mundo 3D indisponível, seguindo no 2D:", erro);
+      document.getElementById("mundo3d-overlay").hidden = true;
+      entrarNaTela(0, "esquerda");
+    });
 }
 
 // ---- telas do mapa ----

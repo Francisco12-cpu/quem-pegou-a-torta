@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="css/dialogo.css" />
   <link rel="stylesheet" href="css/cenarios.css" />
   <link rel="stylesheet" href="css/exploracao.css" />
+  <link rel="stylesheet" href="css/mundo3d.css" />
   <link rel="stylesheet" href="css/minigame.css" />
   <link rel="stylesheet" href="css/telas.css" />
 </head>
@@ -45,6 +46,13 @@
         <div id="area-opcoes"></div>
         <div id="dica-avancar" aria-hidden="true"></div>
       </div>
+    </div>
+
+    <!-- ===== mundo 3D (só no modo 3D; js/mundo3d/) ===== -->
+    <div id="mundo3d-overlay" hidden>
+      <canvas id="mundo3d-canvas"></canvas>
+      <div id="mundo3d-joystick" hidden><div id="mundo3d-joystick-pino"></div></div>
+      <div id="mundo3d-dica"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> ou setas para andar</div>
     </div>
 
     <!-- ===== exploração (plataforma 2D) ===== -->
@@ -294,6 +302,7 @@
   <script src="dados/baus.js"></script>
   <script src="dados/itens.js"></script>
   <script src="dados/casas.js"></script>
+  <script src="dados/mundo3d.js"></script>
   <script src="dados/final.js"></script>
   <script src="dados/musicas.js"></script>
   <script src="dados/config.js"></script>

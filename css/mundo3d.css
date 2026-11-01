@@ -1,0 +1,67 @@
+/* mundo3d.css — o canvas do mundo 3D e o que fica em cima dele (joystick, dica). */
+
+#mundo3d-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  overflow: hidden;
+  background: #bfe8ff;
+}
+
+#mundo3d-overlay[hidden] {
+  display: none;
+}
+
+#mundo3d-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+/* aparece onde o dedo encostou */
+#mundo3d-joystick {
+  --tamanho: clamp(96px, 26vmin, 130px);
+  position: absolute;
+  z-index: 12;
+  width: var(--tamanho);
+  height: var(--tamanho);
+  margin: calc(var(--tamanho) / -2) 0 0 calc(var(--tamanho) / -2);
+  border-radius: 50%;
+  background: rgba(26, 16, 48, 0.32);
+  box-shadow: 0 0 0 3px rgba(255, 212, 121, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+#mundo3d-joystick[hidden] {
+  display: none;
+}
+
+#mundo3d-joystick-pino {
+  width: 42%;
+  height: 42%;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #ff9ccd 0%, var(--rosa) 100%);
+  box-shadow: 0 0 0 3px var(--roxo-noite);
+}
+
+#mundo3d-dica {
+  position: absolute;
+  z-index: 12;
+  left: 50%;
+  top: max(12px, env(safe-area-inset-top, 0px));
+  transform: translateX(-50%);
+  padding: 0.35em 0.9em;
+  border-radius: 999px;
+  background: rgba(26, 16, 48, 0.72);
+  font-size: 0.8em;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+body.toque #mundo3d-dica {
+  display: none;
+}
