@@ -13,7 +13,7 @@ import { criarCenaAberta, criarPalco, ehCelular } from "./cena.js";
 import { empurrarDeCaixa, empurrarDeCirculo } from "./colisao.js";
 import { construirMundo } from "./construtor.js";
 import { Controles } from "./controles.js";
-import { criarInterior } from "./interiores.js";
+import { criarInterior, criarSalaDePapel } from "./interiores.js";
 import { Folha } from "./papel.js";
 import { PoneiPapel, carregarImagem } from "./ponei-papel.js";
 
@@ -94,9 +94,16 @@ function telaDaCasa(casaDados) {
 async function criarLugarInterior(casa, mundo) {
   const interior = casa.dados.interior;
   const tela = telaDaCasa(casa.dados);
-  const sala = dados.interior;
-  const imagem = interior.fundo ? await carregarImagem(interior.fundo) : null;
-  const cena = criarInterior(imagem, sala, interior);
+  const salaDePapel = Boolean(interior.moveis);
+  const sala = salaDePapel ? dados.salaPapel : dados.interior;
+  let cena;
+  let caixas = [];
+  if (salaDePapel) {
+    ({ cena, caixas } = criarSalaDePapel(sala, interior));
+  } else {
+    const imagem = interior.fundo ? await carregarImagem(interior.fundo) : null;
+    cena = criarInterior(imagem, sala, interior);
+  }
   const pontos = await Promise.all(interior.pontos.map((p) => criarPonto(p, cena)));
   pontos.push({
     dados: {
@@ -117,6 +124,7 @@ async function criarLugarInterior(casa, mundo) {
     camera: sala.camera,
     limites: sala.limites,
     casas: [],
+    caixas,
     solidos: [],
     entrada: sala.entrada,
     pontos,
@@ -163,6 +171,7 @@ async function criarMundo() {
     camera: dados.camera,
     limites: { minX: -metade, maxX: metade, minZ: -metade, maxZ: metade },
     casas: construido.casas,
+    caixas: [],
     solidos: construido.solidos,
     entrada: dados.inicio,
     pontos: await Promise.all(dados.pontos.map((p) => criarPonto(p, cena))),
@@ -264,6 +273,7 @@ function atualizarSetaGuia() {
 
 function resolverColisoes(corpo, comPontos) {
   lugar.casas.forEach((c) => empurrarDeCaixa(corpo, c, dados.raioColisaoCasa));
+  lugar.caixas.forEach((c) => empurrarDeCaixa(corpo, c, dados.raioColisaoMovel));
   lugar.solidos.forEach((s) => empurrarDeCirculo(corpo, s.x, s.z, s.raio));
   if (comPontos) {
     lugar.pontos.forEach((p) => {

@@ -27,7 +27,7 @@ function texturaPapel(comBorda) {
   g.fillStyle = "#ffffff";
   g.fillRect(0, 0, lado, lado);
   for (let i = 0; i < 1400; i++) {
-    g.fillStyle = "rgba(90, 60, 40, " + (0.02 + Math.random() * 0.05) + ")";
+    g.fillStyle = "rgba(90, 60, 40, " + (0.01 + Math.random() * 0.025) + ")";
     g.fillRect(Math.random() * lado, Math.random() * lado, 2, 1);
   }
   if (comBorda) {
@@ -111,14 +111,17 @@ export class Folha {
   }
 
   cilindro(raioTopo, raioBase, altura, cor, x = 0, y = 0, z = 0) {
-    const geometria = new THREE.CylinderGeometry(raioTopo, raioBase, altura, 20);
+    const lados = Math.max(raioTopo, raioBase) < 0.5 ? 10 : 20;
+    const geometria = new THREE.CylinderGeometry(raioTopo, raioBase, altura, lados);
     const malha = new THREE.Mesh(geometria, this.material(cor, 1, true));
     malha.position.set(x, y, z);
     return malha;
   }
 
   esfera(raio, cor, x = 0, y = 0, z = 0) {
-    const malha = new THREE.Mesh(new THREE.SphereGeometry(raio, 20, 14), this.material(cor, 1, true));
+    const pequena = raio < 0.5;
+    const geometria = new THREE.SphereGeometry(raio, pequena ? 10 : 20, pequena ? 7 : 14);
+    const malha = new THREE.Mesh(geometria, this.material(cor, 1, true));
     malha.position.set(x, y, z);
     return malha;
   }

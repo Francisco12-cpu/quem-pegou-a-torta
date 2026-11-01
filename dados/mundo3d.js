@@ -73,6 +73,7 @@ var MUNDO3D = {
   raioColisao: 1.1, // a protagonista não atravessa as pôneis
   raioColisaoCasa: 0.9, // folga entre a protagonista e as paredes
   raioColisaoBau: 1.3,
+  raioColisaoMovel: 0.7,
 
   acompanhante: { distancia: 2.6 }, // quão atrás a Pinkie anda (ACOMPANHANTE em dados/casas.js)
 
@@ -123,10 +124,36 @@ var MUNDO3D = {
       z: 24,
       giro: 0,
       interior: {
-        fundo: "assets/cenarios/cozinha-pinkie.png",
-        corChao: "#aa6433",
-        corParede: "#e8d3bd",
-        pontos: [{ id: "pinkie", tipo: "ponei", tela: "confeitaria", x: 3, z: -1.6 }],
+        // sala de papel: paredes, piso e móveis gerados por código (kit em moveis-papel.js)
+        parede: {
+          corA: "#ffe3ec",
+          corB: "#fff5f7",
+          corDetalhe: "#ffc2d6",
+          corLambri: "#9fd9c8",
+          corMoldura: "#fff3dc",
+          lambri: 1.7, // altura do lambri
+        },
+        piso: { corA: "#ffd9e6", corB: "#fff7ea", corSombra: "#d9a9b8", ladrilho: 2.4 },
+        moveis: [
+          // parede do fundo, da esquerda para a direita
+          { tipo: "geladeira", x: -8.4, z: -5.95 },
+          { tipo: "pia", x: -3.7, z: -6.05 },
+          { tipo: "janela", x: -3.7, y: 2.2, z: -6.93 },
+          { tipo: "forno", x: 2.4, z: -6 },
+          { tipo: "vitrine", x: 7.6, z: -6.2 },
+          { tipo: "bandeirinhas", x: -3.4, y: 6.5, z: -6.92, largura: 10 },
+          { tipo: "quadro", x: 5.05, y: 3.9, z: -6.94, largura: 0.9, altura: 1.2 },
+          { tipo: "prateleira", x: -9.55, y: 3.4, z: -1.6, giro: 90, largura: 4.4 },
+          { tipo: "prateleira", x: 9.55, y: 3.4, z: -0.6, giro: -90, largura: 4.4 },
+          // meio da sala
+          { tipo: "ilha", x: -2.9, z: -1.8 },
+          { tipo: "tapete", x: 6, z: 0.4 },
+          { tipo: "mesaRedonda", x: 6, z: 0.4 },
+          { tipo: "banqueta", x: 3.9, z: 0.6 },
+          { tipo: "banqueta", x: 7.7, z: 2, cor: "#8fd8c8" },
+          { tipo: "vaso", x: -8.9, z: 1.2, cor: "#ffd479" },
+        ],
+        pontos: [{ id: "pinkie", tipo: "ponei", tela: "confeitaria", x: 3.2, z: -3.3 }],
       },
     },
     {
@@ -217,7 +244,28 @@ var MUNDO3D = {
     },
   ],
 
-  // medidas iguais em todas as salas
+  // medidas das salas de papel (as casas com `moveis`)
+  salaPapel: {
+    largura: 20,
+    altura: 8,
+    fundoZ: -7,
+    frenteZ: 8,
+    limites: { minX: -9.1, maxX: 9.1, minZ: -5.6, maxZ: 4.4 },
+    entrada: { x: 0, z: 2.4 },
+    saida: { x: 0, z: 4.3, raio: 1.7 },
+    camera: {
+      fov: 44,
+      fovMaximo: 62,
+      altura: 6,
+      distancia: 11.5,
+      olharAltura: 1.9,
+      suavidade: 5,
+      zFixo: 0.6,
+      meiaLargura: 10,
+    },
+  },
+
+  // medidas iguais em todas as salas com cenário pintado
   interior: {
     largura: 18, // da parede do fundo (o cenário pintado)
     fundoZ: -4.5,
