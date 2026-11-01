@@ -14,6 +14,13 @@ var CONFIG = {
   ferramentasDeTeste: "local",
 
   // ---------------------------------------------------------------------------------------
+  // MODO DO JOGO
+  //   "2d" -> a exploração em telas de sempre (pode ser usada com ?modo=2d)
+  //   "3d" -> o mundo 3D (em construção, configurado em dados/mundo3d.js)
+  // Pra testar sem mudar aqui, abra o jogo com ?modo=3d no fim do endereço.
+  modo: "3d",
+
+  // ---------------------------------------------------------------------------------------
   // NOME DO JOGADOR (tela "Escolha seu nome", depois da abertura)
   // Limite de letras do nome. Palavras bloqueadas e nomes de brincadeira ficam em
   // dados/prohibited-names.json.
@@ -47,6 +54,12 @@ var CONFIG = {
     fundo: "assets/especiais/chuva-de-estrelas.mp4",
   },
 };
+
+// Qual modo está valendo: o da URL (?modo=3d), senão o de CONFIG.modo
+function modoDeJogo() {
+  var daUrl = new URLSearchParams(window.location.search).get("modo");
+  return daUrl === "2d" || daUrl === "3d" ? daUrl : CONFIG.modo;
+}
 
 // A ferramenta de teste está ligada neste lugar? (ver `ferramentasDeTeste` acima)
 function ferramentasDeTesteAtivas() {

@@ -96,7 +96,9 @@ var MotorMinigame = (function () {
     el.overlay.innerHTML =
       '<div class="mg-fundo fundo-' +
       (configAtual.fundo || "") +
-      '"></div>' +
+      '"' +
+      (configAtual.imagemFundo ? " style=\"background-image:url('" + configAtual.imagemFundo + "')\"" : "") +
+      "></div>" +
       '<div class="mg-app">' +
       '<div class="mg-titulo">Baú escondido</div>' +
       '<div class="mg-hud">' +

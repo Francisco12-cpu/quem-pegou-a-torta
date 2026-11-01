@@ -19,7 +19,7 @@
 .mg-fundo {
   position: absolute;
   inset: -40px;
-  filter: blur(10px) brightness(0.45) saturate(1.1);
+  filter: blur(3px) brightness(0.62) saturate(1.05);
 }
 
 .mg-app {
@@ -707,7 +707,34 @@
     height: 32px;
   }
   .mg-premio {
-    height: 90px;
+    height: 74px;
+  }
+  /* o cartão de instruções/resultado precisa caber sem rolar */
+  .mg-inner-overlay {
+    padding: 4px 10px;
+    font-size: 0.82em;
+  }
+  .mg-ov-icone {
+    width: 30px;
+    margin-bottom: 2px;
+  }
+  .mg-inner-overlay h2 {
+    font-size: 1.15em;
+    margin-bottom: 2px;
+  }
+  .mg-inner-overlay p {
+    line-height: 1.25;
+    margin-bottom: 2px;
+  }
+  .mg-ov-stats {
+    margin-bottom: 4px;
+  }
+  .mg-ov-stat {
+    padding: 1px 8px;
+  }
+  .mg-ov-stat span {
+    display: inline;
+    margin: 0 0.4em 0 0;
   }
 }
 

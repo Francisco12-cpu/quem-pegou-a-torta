@@ -6,7 +6,11 @@
 
 var TRILHA_EXPLORACAO = "passeio";
 
+var carregandoMundo3D = null; // Promise do módulo js/mundo3d/ (só no modo 3D)
+
 document.addEventListener("DOMContentLoaded", function () {
+  // começa a baixar já no menu: ao apertar "Jogar" o mundo costuma estar pronto
+  if (modoDeJogo() === "3d") carregandoMundo3D = import("./mundo3d/index.js");
   Interface.iniciar();
   Telas.abrirMenu(comecarJogo); // o menu já fica pronto por baixo da tela de abertura
   Telas.abrirAbertura(escolherPersonagem);
@@ -25,7 +29,88 @@ function escolherPersonagem() {
 function comecarJogo() {
   estado.inicio = Date.now();
   Musica.trilha(TRILHA_EXPLORACAO);
+  if (carregandoMundo3D) {
+    comecarMundo3D();
+    return;
+  }
   entrarNaTela(0, "esquerda");
+}
+
+// Se o 3D não puder rodar (sem WebGL, ou abrindo o arquivo direto sem servidor), segue no 2D.
+function comecarMundo3D() {
+  carregandoMundo3D
+    .then(function (mundo) {
+      return mundo.iniciar({
+        sprite: PERSONAGENS.protagonista.sprite,
+        aoInteragir: function (ponto) {
+          interagirNoMundo(mundo, ponto);
+        },
+        aoChegarNoFim: function () {
+          Final3D.comecar(mundo);
+        },
+      });
+    })
+    .then(function () {
+      Interface.mostrarHud(true);
+      Interface.mostrarPlaca(MUNDO3D.nome);
+    })
+    .catch(function (erro) {
+      console.warn("Mundo 3D indisponível, seguindo no 2D:", erro);
+      document.getElementById("mundo3d-overlay").hidden = true;
+      entrarNaTela(0, "esquerda");
+    });
+}
+
+// a mesma cena, com uma imagem de fundo (sem imagem, fica o fundo normal dela)
+function comFundo(cena, imagem) {
+  return imagem ? Object.assign({}, cena, { imagemFundo: imagem }) : cena;
+}
+
+function telaPorId(id) {
+  return TELAS.filter(function (t) {
+    return t.id === id;
+  })[0];
+}
+
+function interagirNoMundo(mundo, ponto) {
+  if (ponto.festa) {
+    Final3D.aoInteragir(ponto);
+    return;
+  }
+
+  function voltarProMundo() {
+    Interface.transicao(function () {
+      Musica.trilha(TRILHA_EXPLORACAO);
+      mundo.retomar();
+    });
+  }
+
+  if (ponto.tipo === "bau") {
+    var bau = BAUS[idDoBau(ponto)];
+    var config = Object.assign({}, bau, { fundo: telaPorId(bau.casa).fundo, imagemFundo: mundo.fotoDoLugar() });
+    Interface.transicao(function () {
+      mundo.esconder();
+      MotorMinigame.iniciar(config, function () {
+        if (estado.ingredientes.indexOf(bau.ingrediente) !== -1) mundo.removerPonto(ponto.id);
+        voltarProMundo();
+      });
+    });
+    return;
+  }
+
+  var cena = comFundo(cenaDaPonei(telaPorId(ponto.tela), ponto), mundo.fotoDoLugar());
+  Interface.transicao(function () {
+    mundo.esconder();
+    MotorDialogo.iniciarCena(cena, function () {
+      estado.conversou[ponto.id] = true;
+      if (ponto.id === ACOMPANHANTE.id) {
+        // a Pinkie sai da cozinha e vai investigar junto
+        mundo.removerPonto(ponto.id);
+        mundo.acompanhar(ponto.id);
+      }
+      voltarProMundo();
+    });
+  });
 }
 
 // ---- telas do mapa ----
@@ -90,6 +175,17 @@ function sairDaTela(indice, lado) {
   });
 }
 
+// a conversa principal, ou só uma fala curta se já conversaram (2D e 3D usam a mesma)
+function cenaDaPonei(tela, ponto) {
+  if (!estado.conversou[ponto.id] && tela.dialogo) return tela.dialogo();
+  var r = tela.repetida || { quemFala: ponto.id, texto: "..." };
+  return {
+    id: "repetida-" + ponto.id,
+    fundo: tela.fundo,
+    falas: [{ quemFala: r.quemFala, lado: "esquerda", texto: r.texto }],
+  };
+}
+
 function interagirNaTela(indice, ponto) {
   var tela = TELAS[indice];
   var x = MotorExploracao.posicaoJogador();
@@ -102,18 +198,7 @@ function interagirNaTela(indice, ponto) {
   }
 
   if (ponto.tipo === "ponei") {
-    var cena;
-    if (!estado.conversou[ponto.id] && tela.dialogo) {
-      cena = tela.dialogo();
-    } else {
-      // já conversaram: só uma fala curta, sem repetir tudo
-      var r = tela.repetida || { quemFala: ponto.id, texto: "..." };
-      cena = {
-        id: "repetida-" + ponto.id,
-        fundo: tela.fundo,
-        falas: [{ quemFala: r.quemFala, lado: "esquerda", texto: r.texto }],
-      };
-    }
+    var cena = cenaDaPonei(tela, ponto);
     Interface.transicao(function () {
       MotorExploracao.esconder();
       MotorDialogo.iniciarCena(cena, function () {

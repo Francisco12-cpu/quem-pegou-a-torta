@@ -130,4 +130,33 @@ var MUSICAS = {
       bateria: { volume: 0.45, notas: "k . h k s . h . k . h k s . s s" },
     },
   },
+
+  // créditos com a festa dançando — animada e bem exagerada, em Sol maior
+  danca: {
+    bpm: 152,
+    canais: {
+      melodia: {
+        instrumento: "quadrada",
+        volume: 0.12,
+        notas:
+          "G5 . G5 A5 B5 . G5 . D6 . B5 . G5 . A5 . C6 . C6 D6 E6 . C6 . A5 . C6 . B5 . A5 . " +
+          "G5 . G5 A5 B5 . G5 . D6 . B5 . G6 . E6 . D6 . C6 B5 A5 . B5 . G5 . . . G5 . . .",
+      },
+      harmonia: {
+        instrumento: "triangular",
+        volume: 0.09,
+        notas:
+          "G3 B3 D4 B3 G3 B3 D4 B3 E3 G3 B3 G3 E3 G3 B3 G3 C4 E4 G4 E4 C4 E4 G4 E4 D4 F#4 A4 F#4 D4 F#4 A4 F#4 " +
+          "G3 B3 D4 B3 G3 B3 D4 B3 E3 G3 B3 G3 E3 G3 B3 G3 C4 E4 G4 E4 D4 F#4 A4 F#4 G3 B3 D4 B3 G3 . . .",
+      },
+      baixo: {
+        instrumento: "baixo",
+        volume: 0.2,
+        notas:
+          "G2 . G2 . D3 . G2 . E2 . E2 . B2 . E2 . C3 . C3 . G2 . C3 . D3 . D3 . A2 . D3 . " +
+          "G2 . G2 . D3 . G2 . E2 . E2 . B2 . E2 . C3 . C3 . D3 . D3 . G2 . D3 . G2 . . .",
+      },
+      bateria: { volume: 0.5, notas: "k h s h k h s h k k s h k h s s" },
+    },
+  },
 };

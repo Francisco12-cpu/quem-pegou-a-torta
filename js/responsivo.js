@@ -6,6 +6,7 @@
 
   var consultaMobile = window.matchMedia("(max-width: 768px)");
   var consultaRetrato = window.matchMedia("(orientation: portrait)");
+  var consultaToque = window.matchMedia("(hover: none) and (pointer: coarse)");
   var avisoRotacao = null;
 
   function atualizarClasseDispositivo() {
@@ -21,29 +22,21 @@
     atualizarAvisoRotacao();
   }
 
-  // Aviso leve sugerindo girar a tela quando é celular em retrato.
-  // Não bloqueia o jogo — é só um toast que some sozinho quando a orientação muda.
+  // Celular em pé: o jogo não continua. A tela "Deite o celular" fica por cima de tudo (e o
+  // mundo 3D fica parado) até a orientação mudar; aí tudo segue de onde estava.
   function atualizarAvisoRotacao() {
     if (!avisoRotacao) {
-      avisoRotacao = document.getElementById("aviso-rotacao");
+      avisoRotacao = document.getElementById("girar-celular");
     }
     if (!avisoRotacao) return;
 
-    var deveMostrar = consultaMobile.matches && consultaRetrato.matches;
-    avisoRotacao.hidden = !deveMostrar;
-    clearTimeout(atualizarAvisoRotacao._timer);
-    if (deveMostrar) {
-      // o jogo também funciona em pé — o aviso é só uma sugestão, some sozinho
-      atualizarAvisoRotacao._timer = setTimeout(function () {
-        avisoRotacao.hidden = true;
-      }, 5000);
-    }
+    var deveBloquear = consultaToque.matches && consultaRetrato.matches;
+    avisoRotacao.hidden = !deveBloquear;
+    document.body.classList.toggle("precisa-girar", deveBloquear);
   }
 
   // Tela de toque: mostra os botões na tela (setas e ação) em vez das dicas de teclado.
   // Liga se o aparelho só tem toque, ou no primeiro toque de verdade (tablet com teclado etc.).
-  var consultaToque = window.matchMedia("(hover: none) and (pointer: coarse)");
-
   function marcarToque(ehToque) {
     document.body.classList.toggle("toque", ehToque);
   }
