@@ -15,10 +15,10 @@ var CONFIG = {
 
   // ---------------------------------------------------------------------------------------
   // MODO DO JOGO
-  //   "2d" -> a exploração em telas de sempre
+  //   "2d" -> a exploração em telas de sempre (pode ser usada com ?modo=2d)
   //   "3d" -> o mundo 3D (em construção, configurado em dados/mundo3d.js)
   // Pra testar sem mudar aqui, abra o jogo com ?modo=3d no fim do endereço.
-  modo: "2d",
+  modo: "3d",
 
   // ---------------------------------------------------------------------------------------
   // NOME DO JOGADOR (tela "Escolha seu nome", depois da abertura)
