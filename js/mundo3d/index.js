@@ -31,6 +31,7 @@ let controles = null;
 let protagonista = null;
 let spriteAtual = null;
 let mundoAberto = null;
+let salaDaFesta = null; // { cena, camera }: só aparece como fundo das cenas finais
 let portas = []; // um ponto de porta por casa, na mesma ordem de dados.casas
 let nuvens = [];
 let setores = []; // [{ malha, x, z }]: flores e árvores, por pedaço do mapa
@@ -184,6 +185,13 @@ async function criarMundo() {
     pontos: await Promise.all(dados.pontos.map((p) => criarPonto(p, cena))),
   };
 
+  const casaDaFesta = dados.casas.find((c) => c.fim);
+  const medidasFesta = medidasDaSala(casaDaFesta.interior);
+  salaDaFesta = {
+    cena: criarSalaDePapel(medidasFesta, casaDaFesta.interior).cena,
+    camera: medidasFesta.camera,
+  };
+
   portas = await Promise.all(
     construido.casas.map(async (casa, i) => {
       const anterior = dados.casas[i - 1];
@@ -196,7 +204,7 @@ async function criarMundo() {
           exige: casa.dados.exige,
           trancada: anterior ? "Ainda não. Melhor ir antes: " + nomeDaCasa(anterior) + "." : null,
           fim: casa.dados.fim,
-          destino: casa.dados.interior ? await criarLugarInterior(casa, mundo) : null,
+          destino: casa.dados.fim ? null : await criarLugarInterior(casa, mundo),
         },
       };
     })
@@ -467,7 +475,7 @@ function interagir() {
   if (ponto.fim) {
     Musica.efeito("passagem");
     parar();
-    if (aoChegarNoFim) aoChegarNoFim();
+    if (aoChegarNoFim) aoChegarNoFim(fotografar(salaDaFesta));
     return;
   }
   if (ponto.destino) {
@@ -477,6 +485,25 @@ function interagir() {
   Musica.efeito("interagir");
   parar();
   if (aoInteragir) aoInteragir(ponto);
+}
+
+// Foto de um lugar visto do meio, sem pôneis (nos diálogos elas aparecem grandes, na frente).
+function fotografar(alvo) {
+  const pessoas = [protagonista.grupo];
+  if (acompanhante) pessoas.push(acompanhante.ponei.grupo);
+  (alvo.pontos || []).forEach((p) => {
+    if (p.ponei) pessoas.push(p.ponei.grupo);
+  });
+  pessoas.forEach((g) => (g.visible = false));
+
+  palco.usarCamera(alvo.camera);
+  palco.seguir({ x: 0, z: 0 }, null);
+  const imagem = palco.foto(alvo.cena);
+
+  pessoas.forEach((g) => (g.visible = true));
+  palco.usarCamera(lugar.camera);
+  palco.seguir(jogador, null);
+  return imagem;
 }
 
 function ligar() {
@@ -492,7 +519,7 @@ function ligar() {
 
 // ---- API usada por main.js ----
 
-// opcoes: { sprite, aoInteragir(ponto) (pônei ou baú), aoChegarNoFim() (a porta da festa) }
+// opcoes: { sprite, aoInteragir(ponto) (pônei ou baú), aoChegarNoFim(imagemDaSala) (a festa) }
 export async function iniciar(opcoes) {
   if (!palco) montar();
   el.overlay.hidden = false; // o canvas precisa ter tamanho
@@ -502,6 +529,11 @@ export async function iniciar(opcoes) {
   aoChegarNoFim = opcoes.aoChegarNoFim;
   irPara(mundoAberto, mundoAberto.entrada);
   ligar();
+}
+
+// imagem do lugar onde a protagonista está, pra usar de fundo no diálogo e no baú
+export function fotoDoLugar() {
+  return fotografar(lugar);
 }
 
 // volta de um diálogo ou do baú: a protagonista continua onde estava

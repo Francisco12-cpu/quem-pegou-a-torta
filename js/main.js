@@ -7,6 +7,7 @@
 var TRILHA_EXPLORACAO = "passeio";
 
 var carregandoMundo3D = null; // Promise do módulo js/mundo3d/ (só no modo 3D)
+var imagemFundoFinal = null; // no 3D, foto da sala da festa (fundo das cenas finais)
 
 document.addEventListener("DOMContentLoaded", function () {
   // começa a baixar já no menu: ao apertar "Jogar" o mundo costuma estar pronto
@@ -45,7 +46,8 @@ function comecarMundo3D() {
         aoInteragir: function (ponto) {
           interagirNoMundo(mundo, ponto);
         },
-        aoChegarNoFim: function () {
+        aoChegarNoFim: function (imagemDaSala) {
+          imagemFundoFinal = imagemDaSala;
           Interface.transicao(function () {
             mundo.esconder();
             comecarConfronto();
@@ -64,6 +66,11 @@ function comecarMundo3D() {
     });
 }
 
+// a mesma cena, com uma imagem de fundo (sem imagem, fica o fundo normal dela)
+function comFundo(cena, imagem) {
+  return imagem ? Object.assign({}, cena, { imagemFundo: imagem }) : cena;
+}
+
 function telaPorId(id) {
   return TELAS.filter(function (t) {
     return t.id === id;
@@ -80,7 +87,7 @@ function interagirNoMundo(mundo, ponto) {
 
   if (ponto.tipo === "bau") {
     var bau = BAUS[idDoBau(ponto)];
-    var config = Object.assign({}, bau, { fundo: telaPorId(bau.casa).fundo });
+    var config = Object.assign({}, bau, { fundo: telaPorId(bau.casa).fundo, imagemFundo: mundo.fotoDoLugar() });
     Interface.transicao(function () {
       mundo.esconder();
       MotorMinigame.iniciar(config, function () {
@@ -91,7 +98,7 @@ function interagirNoMundo(mundo, ponto) {
     return;
   }
 
-  var cena = cenaDaPonei(telaPorId(ponto.tela), ponto);
+  var cena = comFundo(cenaDaPonei(telaPorId(ponto.tela), ponto), mundo.fotoDoLugar());
   Interface.transicao(function () {
     mundo.esconder();
     MotorDialogo.iniciarCena(cena, function () {
@@ -214,9 +221,9 @@ function interagirNaTela(indice, ponto) {
 
 function comecarConfronto() {
   Musica.trilha("suspense");
-  MotorDialogo.iniciarCena(CENA_06_CONFRONTO, function () {
+  MotorDialogo.iniciarCena(comFundo(CENA_06_CONFRONTO, imagemFundoFinal), function () {
     Interface.transicao(function () {
-      MotorDialogo.iniciarCena(CENA_07_REVELACAO, function () {
+      MotorDialogo.iniciarCena(comFundo(CENA_07_REVELACAO, imagemFundoFinal), function () {
         Telas.abrirCaso(depoisDoCaso);
       });
     });
@@ -228,7 +235,7 @@ function depoisDoCaso() {
   if (completo) {
     Musica.trilha("festa");
     Interface.mostrarHud(true);
-    MotorDialogo.iniciarCena(CENA_08_BONUS_TORTA_NOVA, function () {
+    MotorDialogo.iniciarCena(comFundo(CENA_08_BONUS_TORTA_NOVA, imagemFundoFinal), function () {
       Telas.abrirFim(true);
     });
     return;

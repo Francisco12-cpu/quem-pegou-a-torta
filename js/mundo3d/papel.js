@@ -193,12 +193,13 @@ export function fundirPecas(grupo) {
 
   grupo.traverse((peca) => {
     if (!peca.isMesh) return;
+    paraGrupo.multiplyMatrices(inversa, peca.matrixWorld);
     if (peca.userData.solta) {
+      paraGrupo.decompose(peca.position, peca.quaternion, peca.scale);
       soltas.push(peca);
       return;
     }
     const geometria = peca.geometry.index ? peca.geometry.toNonIndexed() : peca.geometry;
-    paraGrupo.multiplyMatrices(inversa, peca.matrixWorld);
     if (Array.isArray(peca.material)) {
       geometria.groups.forEach((g) => acrescentar(geometria, peca.material[g.materialIndex], g.start, g.count));
     } else {

@@ -669,6 +669,102 @@ function mesinha(f, o) {
   return { grupo: g, largura: 2.3, profundidade: 2.3, redondo: true };
 }
 
+// ---- festa no celeiro ----
+
+function fardoDeFeno(f, o) {
+  const g = new THREE.Group();
+  g.add(
+    f.caixa(2.6, 1.3, 1.5, "#e3c15f", 0, 0.65, 0),
+    f.caixa(2.62, 0.08, 1.52, "#b5892f", 0, 1.32, 0),
+    f.caixa(0.08, 1.32, 1.52, "#a8461f", -0.65, 0.66, 0),
+    f.caixa(0.08, 1.32, 1.52, "#a8461f", 0.65, 0.66, 0)
+  );
+  [[-1, 0.85], [-0.2, 0.42], [0.35, 0.95], [1, 0.5]].forEach(([x, y]) => {
+    const palha = f.caixa(0.34, 0.05, 0.03, "#fff0a6", x, y, 0.77);
+    palha.rotation.z = x;
+    g.add(palha);
+  });
+  return { grupo: g, largura: 2.6, profundidade: 1.5 };
+}
+
+function barrilDeMacas(f) {
+  const g = new THREE.Group();
+  g.add(
+    f.cilindro(0.95, 0.85, 1.5, "#a9693f", 0, 0.75, 0),
+    f.cilindro(0.97, 0.97, 0.12, "#6b5a68", 0, 1.2, 0),
+    f.cilindro(0.9, 0.9, 0.12, "#6b5a68", 0, 0.3, 0)
+  );
+  [[-0.4, 0.1], [0.4, 0.15], [0, -0.3], [0, 0.45], [-0.35, -0.4], [0.42, -0.35]].forEach(([x, z], i) => {
+    g.add(f.esfera(0.32, i % 3 === 2 ? "#f2b13c" : VERMELHO, x, 1.62, z));
+  });
+  return { grupo: g, largura: 1.9, profundidade: 1.9, redondo: true };
+}
+
+// a mesa da festa: tudo pronto, menos a torta (o prato do meio está vazio)
+function mesaDeFesta(f) {
+  const g = new THREE.Group();
+  const largura = 9;
+  g.add(f.caixa(largura, 0.14, 2.2, CREME, 0, 1.35, 0), f.caixa(largura + 0.1, 1.2, 0.05, "#ff9ccd", 0, 0.82, 1.1));
+  for (let i = 0; i < 12; i++) {
+    g.add(f.caixa(0.36, 1.25, 0.06, i % 2 ? "#ffd479" : "#fff3dc", -largura / 2 + 0.4 + i * 0.75, 0.75, 1.13));
+  }
+  [[-4.2, -0.9], [4.2, -0.9], [-4.2, 0.9], [4.2, 0.9]].forEach(([x, z]) => g.add(f.caixa(0.2, 1.3, 0.2, MADEIRA_ESCURA, x, 0.65, z)));
+
+  g.add(f.cilindro(0.85, 0.65, 0.08, "#ffffff", 0, 1.47, 0), f.cilindro(0.1, 0.16, 0.06, "#ffffff", 0, 1.54, 0));
+  g.add(
+    bolo(f, -3.2, 1.42, -0.1, ROSA, 0.9),
+    cupcake(f, -1.8, 1.42, 0.45, OURO),
+    cupcake(f, -1.35, 1.42, 0.1, "#8fc7ff"),
+    cupcake(f, 1.4, 1.42, 0.4, ROSA),
+    cupcake(f, 1.85, 1.42, 0.05, "#c8a2f0"),
+    pote(f, 2.9, 1.42, 0.2, "#d9a441"),
+    pote(f, 3.45, 1.42, -0.15, VERMELHO)
+  );
+  return { grupo: g, largura: largura, profundidade: 2.3 };
+}
+
+function baloes(f, o) {
+  const g = new THREE.Group();
+  (o.cores || [ROSA_FORTE, OURO, "#8fc7ff", "#c8a2f0"]).forEach((cor, i) => {
+    const x = [-0.55, 0.45, 0, 0.8][i % 4];
+    const y = [2.9, 3.1, 3.9, 2.3][i % 4];
+    const balao = f.esfera(0.6, cor, x, y, (i % 2) * 0.25);
+    balao.scale.y = 1.2;
+    const fio = f.caixa(0.03, y - 0.7, 0.03, "#fff3dc", x / 2, (y - 0.7) / 2, 0.05);
+    fio.rotation.z = -x * 0.12;
+    g.add(balao, fio);
+  });
+  g.add(f.caixa(0.6, 0.3, 0.6, MADEIRA, 0, 0.15, 0.05));
+  return { grupo: g, largura: 0.9, profundidade: 0.9, redondo: true };
+}
+
+function presentes(f) {
+  const g = new THREE.Group();
+  [
+    [-0.7, 0, 1.2, 1, ROSA_FORTE, OURO],
+    [0.6, 0.1, 1, 0.8, "#8fc7ff", "#fff3dc"],
+    [-0.15, -0.5, 0.8, 0.65, OURO, ROSA_FORTE],
+  ].forEach(([x, z, l, a, cor, fita]) => {
+    g.add(
+      f.caixa(l, a, l, cor, x, a / 2, z),
+      f.caixa(0.16, a + 0.02, l + 0.02, fita, x, a / 2, z),
+      f.caixa(l + 0.02, 0.16, l + 0.02, fita, x, a * 0.55, z),
+      f.esfera(0.14, fita, x - 0.1, a + 0.08, z),
+      f.esfera(0.14, fita, x + 0.1, a + 0.08, z)
+    );
+  });
+  return { grupo: g, largura: 2.4, profundidade: 1.8 };
+}
+
+function faixa(f, o) {
+  const g = new THREE.Group();
+  g.add(
+    f.caixa((o.largura || 8) + 0.3, 1.65, 0.05, ROSA_FORTE, 0, 0, -0.03),
+    f.placa(o.texto, o.largura || 8, 1.35, 0, 0, 0.02, "#c9367f")
+  );
+  return { grupo: g };
+}
+
 const TIPOS = {
   balcao,
   ilha,
@@ -709,6 +805,12 @@ const TIPOS = {
   planta,
   gaiola,
   mesinha,
+  fardoDeFeno,
+  barrilDeMacas,
+  mesaDeFesta,
+  baloes,
+  presentes,
+  faixa,
 };
 
 // item: { tipo, x, y?, z, giro? (graus), ...opções do móvel }

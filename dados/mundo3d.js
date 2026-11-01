@@ -114,7 +114,8 @@ var MUNDO3D = {
   //   interior — a sala de papel: `largura` e `fundoZ` (tamanho, opcionais), `parede`, `piso`,
   //              `moveis` (peças do kit em js/mundo3d/moveis-papel.js; x e z no chão da sala,
   //              z mais negativo = mais perto da parede do fundo), `pontos` (pôneis e baús)
-  //   fim      — sem interior: passar pela porta encerra a exploração (vai para o confronto)
+  //   fim      — passar pela porta encerra a exploração (vai para o confronto); a sala dela
+  //              só aparece como fundo das cenas finais
   casas: [
     {
       id: "confeitaria",
@@ -338,6 +339,39 @@ var MUNDO3D = {
       x: 18,
       z: -50,
       giro: -15,
+      interior: {
+        // não se anda aqui: esta sala é o fundo do confronto e das cenas finais
+        largura: 24,
+        fundoZ: -7,
+        corTapete: "#ff9ccd",
+        parede: {
+          corA: "#c9574a",
+          corB: "#bd4c40",
+          corDetalhe: "#d9786a",
+          corLambri: "#8f5a36",
+          corMoldura: "#ffd479",
+          lambri: 1.6,
+        },
+        piso: { tipo: "tabuas", corA: "#c99a5e", corB: "#bd8d52", corSombra: "#8f6538", ladrilho: 5 },
+        moveis: [
+          { tipo: "faixa", x: 0, y: 5.5, z: -6.9, texto: "Surpresa!", largura: 7 },
+          { tipo: "bandeirinhas", x: -6, y: 6.9, z: -6.92, largura: 11 },
+          { tipo: "bandeirinhas", x: 6, y: 6.9, z: -6.92, largura: 11 },
+          { tipo: "janela", x: -8.6, y: 2.6, z: -6.93, altura: 2.6, largura: 2.8, cor: "#ffd479", corForte: "#ff6fb0" },
+          { tipo: "janela", x: 8.6, y: 2.6, z: -6.93, altura: 2.6, largura: 2.8, cor: "#ffd479", corForte: "#ff6fb0" },
+          { tipo: "mesaDeFesta", x: 0, z: -4.2 },
+          { tipo: "baloes", x: -6, z: -5.6 },
+          { tipo: "baloes", x: 6, z: -5.6, cores: ["#c8a2f0", "#8fd8c8", "#ff6fb0", "#ffd479"] },
+          { tipo: "fardoDeFeno", x: -9.9, z: -4.6, giro: 90 },
+          { tipo: "fardoDeFeno", x: -9.9, z: -1.6, giro: 90 },
+          { tipo: "fardoDeFeno", x: 9.9, z: -4.4, giro: -90 },
+          { tipo: "barrilDeMacas", x: 9.6, z: -1.2 },
+          { tipo: "barrilDeMacas", x: -7.4, z: -2.2 },
+          { tipo: "presentes", x: 7, z: -2.8 },
+          { tipo: "tapete", x: 0, z: 0, raio: 3.4, cor: "#ff6fb0", corMeio: "#ffd479", corCentro: "#ff9ccd" },
+        ],
+        pontos: [],
+      },
     },
   ],
 

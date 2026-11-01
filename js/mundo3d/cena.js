@@ -65,11 +65,18 @@ export function criarPalco(canvas) {
 
   new ResizeObserver(ajustar).observe(canvas.parentElement);
 
+  // Desenha a cena e devolve a imagem. Precisa ser no mesmo passo do desenho: depois disso o
+  // navegador pode limpar o canvas.
+  function foto(cena) {
+    renderer.render(cena, camera);
+    return canvas.toDataURL("image/jpeg", 0.85);
+  }
+
   function info() {
     return { ...renderer.info.render, geometrias: renderer.info.memory.geometries, texturas: renderer.info.memory.textures };
   }
 
-  return { camera, ajustar, usarCamera, seguir, definirEscala, desenhar, info };
+  return { camera, ajustar, usarCamera, seguir, definirEscala, desenhar, foto, info };
 }
 
 export function criarCenaAberta(dados) {
