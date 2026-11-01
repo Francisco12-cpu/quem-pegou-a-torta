@@ -40,7 +40,12 @@ function comecarJogo() {
 function comecarMundo3D() {
   carregandoMundo3D
     .then(function (mundo) {
-      return mundo.iniciar({ sprite: PERSONAGENS.protagonista.sprite });
+      return mundo.iniciar({
+        sprite: PERSONAGENS.protagonista.sprite,
+        aoInteragir: function (ponto) {
+          interagirNoMundo(mundo, ponto);
+        },
+      });
     })
     .then(function () {
       Interface.mostrarHud(true);
@@ -51,6 +56,23 @@ function comecarMundo3D() {
       document.getElementById("mundo3d-overlay").hidden = true;
       entrarNaTela(0, "esquerda");
     });
+}
+
+function interagirNoMundo(mundo, ponto) {
+  var tela = TELAS.filter(function (t) {
+    return t.id === ponto.tela;
+  })[0];
+  var cena = cenaDaPonei(tela, ponto);
+  Interface.transicao(function () {
+    mundo.esconder();
+    MotorDialogo.iniciarCena(cena, function () {
+      estado.conversou[ponto.id] = true;
+      Interface.transicao(function () {
+        Musica.trilha(TRILHA_EXPLORACAO);
+        mundo.retomar();
+      });
+    });
+  });
 }
 
 // ---- telas do mapa ----
@@ -115,6 +137,17 @@ function sairDaTela(indice, lado) {
   });
 }
 
+// a conversa principal, ou só uma fala curta se já conversaram (2D e 3D usam a mesma)
+function cenaDaPonei(tela, ponto) {
+  if (!estado.conversou[ponto.id] && tela.dialogo) return tela.dialogo();
+  var r = tela.repetida || { quemFala: ponto.id, texto: "..." };
+  return {
+    id: "repetida-" + ponto.id,
+    fundo: tela.fundo,
+    falas: [{ quemFala: r.quemFala, lado: "esquerda", texto: r.texto }],
+  };
+}
+
 function interagirNaTela(indice, ponto) {
   var tela = TELAS[indice];
   var x = MotorExploracao.posicaoJogador();
@@ -127,18 +160,7 @@ function interagirNaTela(indice, ponto) {
   }
 
   if (ponto.tipo === "ponei") {
-    var cena;
-    if (!estado.conversou[ponto.id] && tela.dialogo) {
-      cena = tela.dialogo();
-    } else {
-      // já conversaram: só uma fala curta, sem repetir tudo
-      var r = tela.repetida || { quemFala: ponto.id, texto: "..." };
-      cena = {
-        id: "repetida-" + ponto.id,
-        fundo: tela.fundo,
-        falas: [{ quemFala: r.quemFala, lado: "esquerda", texto: r.texto }],
-      };
-    }
+    var cena = cenaDaPonei(tela, ponto);
     Interface.transicao(function () {
       MotorExploracao.esconder();
       MotorDialogo.iniciarCena(cena, function () {

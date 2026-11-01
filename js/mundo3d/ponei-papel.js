@@ -101,6 +101,11 @@ export class PoneiPapel {
     this.tempo = Math.random() * 10; // NPCs não respiram todas juntas
   }
 
+  // vira de lado pra olhar para o ponto x (NPC olhando pra quem chega perto)
+  olharPara(x) {
+    if (Math.abs(x - this.grupo.position.x) > 0.3) this.lado = x > this.grupo.position.x ? -1 : 1;
+  }
+
   // vx, vz: velocidade atual; vMax: velocidade máxima; camera: pra olhar pra ela
   atualizar(dt, vx, vz, vMax, camera) {
     const rapidez = Math.min(1, Math.hypot(vx, vz) / vMax);

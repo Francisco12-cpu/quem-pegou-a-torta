@@ -28,5 +28,15 @@ var MUNDO3D = {
     ladrilho: 18, // tamanho, em unidades, de cada repetição da textura
   },
 
-  tufos: { quantidade: 220, semente: 7 }, // tufinhos de grama e flores espalhados
+  // tufinhos de grama e flores soltas; `flores` = fração que é flor (o resto é capim)
+  tufos: { quantidade: 900, flores: 0.55, semente: 7 },
+  // grupinhos de flores (cada um com uma ou duas cores)
+  canteiros: { quantidade: 110, flores: 11, raio: 2.6, semente: 11 },
+
+  raioInteracao: 3.4, // distância pra poder falar com uma pônei
+  raioColisao: 1.1, // a protagonista não atravessa as pôneis
+
+  // pôneis no mundo. `tela` = id em dados/casas.js de onde vêm o diálogo e a fala repetida.
+  // A Pinkie fica aqui fora só até a confeitaria existir (etapa 3).
+  pontos: [{ id: "pinkie", tipo: "ponei", tela: "confeitaria", x: 7, z: -7 }],
 };

@@ -75,11 +75,14 @@ function criarChao(dados) {
   return malha;
 }
 
-// folha com os desenhos: tufo, flor rosa, flor amarela, flor roxa
+// folha com os desenhos: tufo de capim seguido das flores
+const CORES_FLOR = ["#ff9ccd", "#ffd479", "#c8a2f0", "#fff6e8", "#8fc7ff"];
+const TIPOS_TUFO = 1 + CORES_FLOR.length;
+
 function texturaTufos() {
   const q = 64;
   const canvas = document.createElement("canvas");
-  canvas.width = q * 4;
+  canvas.width = q * TIPOS_TUFO;
   canvas.height = q;
   const g = canvas.getContext("2d");
 
@@ -109,9 +112,7 @@ function texturaTufos() {
     g.fill();
   }
   capim(0);
-  flor(q, "#ff9ccd");
-  flor(q * 2, "#ffd479");
-  flor(q * 3, "#c8a2f0");
+  CORES_FLOR.forEach((cor, i) => flor(q * (i + 1), cor));
 
   const textura = new THREE.CanvasTexture(canvas);
   textura.colorSpace = THREE.SRGBColorSpace;
@@ -122,19 +123,35 @@ function criarTufos(dados) {
   const r = sorteador(dados.tufos.semente);
   const material = new THREE.MeshBasicMaterial({ map: texturaTufos(), alphaTest: 0.5, side: THREE.DoubleSide });
   const grupo = new THREE.Group();
-  const geometrias = [0, 1, 2, 3].map((i) => {
+  const porTipo = [];
+  const geometrias = [];
+  for (let i = 0; i < TIPOS_TUFO; i++) {
     const g = new THREE.PlaneGeometry(1, 1);
     g.translate(0, 0.5, 0);
     const uv = g.attributes.uv;
-    for (let n = 0; n < uv.count; n++) uv.setX(n, (i + uv.getX(n)) / 4);
-    return g;
-  });
+    for (let n = 0; n < uv.count; n++) uv.setX(n, (i + uv.getX(n)) / TIPOS_TUFO);
+    geometrias.push(g);
+    porTipo.push([]);
+  }
 
+  const florAoAcaso = () => 1 + Math.floor(r() * CORES_FLOR.length);
   const metade = dados.tamanho / 2;
-  const porTipo = [[], [], [], []];
+
   for (let i = 0; i < dados.tufos.quantidade; i++) {
-    const tipo = r() < 0.6 ? 0 : 1 + Math.floor(r() * 3);
+    const tipo = r() < dados.tufos.flores ? florAoAcaso() : 0;
     porTipo[tipo].push({ x: (r() * 2 - 1) * metade, z: (r() * 2 - 1) * metade, s: 0.7 + r() * 0.6 });
+  }
+
+  const c = dados.canteiros;
+  for (let i = 0; i < c.quantidade; i++) {
+    const cx = (r() * 2 - 1) * metade;
+    const cz = (r() * 2 - 1) * metade;
+    const cores = [florAoAcaso(), florAoAcaso()];
+    for (let n = 0; n < c.flores; n++) {
+      const a = r() * Math.PI * 2;
+      const d = Math.sqrt(r()) * c.raio;
+      porTipo[cores[n % 2]].push({ x: cx + Math.cos(a) * d, z: cz + Math.sin(a) * d, s: 0.65 + r() * 0.5 });
+    }
   }
 
   const m = new THREE.Matrix4();
