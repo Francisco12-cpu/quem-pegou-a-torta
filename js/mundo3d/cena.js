@@ -1,25 +1,22 @@
-// cena.js — renderer, câmera e o seguir da câmera. Não sabe nada do jogo.
+// cena.js — renderer, câmera e o seguir da câmera. Não sabe nada do jogo. Cada lugar (o mundo,
+// cada interior) tem a sua própria THREE.Scene; aqui só se desenha a que estiver valendo.
 
 import * as THREE from "../vendor/three.min.js";
 
 const DPR_MAXIMO = 2;
 
-export function criarCena(canvas, dados) {
+export function criarPalco(canvas) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, DPR_MAXIMO));
 
-  const cena = new THREE.Scene();
-  cena.background = new THREE.Color(dados.ceu);
-  cena.fog = new THREE.Fog(dados.ceu, dados.neblina.perto, dados.neblina.longe);
-
-  const cfg = dados.camera;
-  const camera = new THREE.PerspectiveCamera(cfg.fov, 16 / 9, 0.5, 300);
+  const camera = new THREE.PerspectiveCamera(38, 16 / 9, 0.5, 300);
   const olhar = new THREE.Vector3();
+  let cfg = null;
 
   function ajustar() {
     const largura = canvas.parentElement.clientWidth;
     const altura = canvas.parentElement.clientHeight;
-    if (!largura || !altura) return;
+    if (!largura || !altura || !cfg) return;
     const proporcao = largura / altura;
     renderer.setSize(largura, altura, false);
     camera.aspect = proporcao;
@@ -28,23 +25,42 @@ export function criarCena(canvas, dados) {
     camera.updateProjectionMatrix();
   }
 
-  // dt = null cola a câmera no alvo de uma vez (ao entrar numa área)
+  // cfg: { fov, fovMaximo, altura, distancia, olharAltura, suavidade }, e nos interiores
+  // zFixo (a câmera não anda em z) e meiaLargura (não mostra além das paredes laterais)
+  function usarCamera(novaCfg) {
+    cfg = novaCfg;
+    ajustar();
+  }
+
+  function alvoX(x) {
+    if (!cfg.meiaLargura) return x;
+    const meiaVisao = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.aspect * cfg.distancia;
+    const limite = Math.max(0, cfg.meiaLargura - meiaVisao);
+    return Math.max(-limite, Math.min(limite, x));
+  }
+
+  // dt = null cola a câmera no alvo de uma vez (ao entrar num lugar)
   function seguir(alvo, dt) {
     const t = dt == null ? 1 : 1 - Math.exp(-cfg.suavidade * dt);
-    olhar.x += (alvo.x - olhar.x) * t;
+    olhar.x += (alvoX(alvo.x) - olhar.x) * t;
     olhar.y = cfg.olharAltura;
-    olhar.z += (alvo.z - olhar.z) * t;
+    olhar.z += ((cfg.zFixo != null ? cfg.zFixo : alvo.z) - olhar.z) * t;
     camera.position.set(olhar.x, cfg.altura, olhar.z + cfg.distancia);
     camera.lookAt(olhar);
   }
 
-  function desenhar() {
+  function desenhar(cena) {
     renderer.render(cena, camera);
   }
 
-  const observador = new ResizeObserver(ajustar);
-  observador.observe(canvas.parentElement);
-  ajustar();
+  new ResizeObserver(ajustar).observe(canvas.parentElement);
 
-  return { cena, camera, ajustar, seguir, desenhar };
+  return { camera, ajustar, usarCamera, seguir, desenhar };
+}
+
+export function criarCenaAberta(dados) {
+  const cena = new THREE.Scene();
+  cena.background = new THREE.Color(dados.ceu);
+  cena.fog = new THREE.Fog(dados.ceu, dados.neblina.perto, dados.neblina.longe);
+  return cena;
 }

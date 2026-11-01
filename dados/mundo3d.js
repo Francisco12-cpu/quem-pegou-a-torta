@@ -10,11 +10,11 @@ var MUNDO3D = {
   alturaPonei: 2.7,
 
   camera: {
-    fov: 38, // em tela deitada; em tela em pé abre até `fovMaximo`
+    fov: 42, // em tela deitada; em tela em pé abre até `fovMaximo`
     fovMaximo: 60,
     altura: 5.2, // acima do chão
     distancia: 12.5, // atrás da protagonista
-    olharAltura: 1.5, // altura do ponto para onde a câmera olha
+    olharAltura: 2.5, // altura do ponto para onde a câmera olha
     suavidade: 5, // maior = segue mais colada
   },
 
@@ -36,7 +36,51 @@ var MUNDO3D = {
   raioInteracao: 3.4, // distância pra poder falar com uma pônei
   raioColisao: 1.1, // a protagonista não atravessa as pôneis
 
-  // pôneis no mundo. `tela` = id em dados/casas.js de onde vêm o diálogo e a fala repetida.
-  // A Pinkie fica aqui fora só até a confeitaria existir (etapa 3).
-  pontos: [{ id: "pinkie", tipo: "ponei", tela: "confeitaria", x: 7, z: -7 }],
+  raioColisaoCasa: 0.9, // folga entre a protagonista e as paredes
+
+  // pôneis soltas no mundo. `tela` = id em dados/casas.js de onde vêm o diálogo e a fala repetida.
+  pontos: [],
+
+  // As casas: mude `x`, `z` e `giro` para colocá-las onde quiser, sem mexer no motor.
+  //   tipo     — desenho da casa (funções em js/mundo3d/casas-papel.js)
+  //   giro     — graus; 0 = porta virada para a câmera. Use de -90 a 90: a câmera não gira,
+  //              então uma porta virada para o fundo ficaria escondida.
+  //   interior — a sala: `fundo` é o cenário pintado, `pontos` são as pôneis lá dentro
+  casas: [
+    {
+      id: "confeitaria",
+      tipo: "confeitaria",
+      placa: "Confeitaria",
+      x: 6,
+      z: -25,
+      giro: 0,
+      interior: {
+        nome: "Confeitaria da Pinkie",
+        fundo: "assets/cenarios/cozinha-pinkie.png",
+        corChao: "#aa6433",
+        corParede: "#e8d3bd",
+        pontos: [{ id: "pinkie", tipo: "ponei", tela: "confeitaria", x: 3, z: -1.6 }],
+      },
+    },
+  ],
+
+  // medidas iguais em todas as salas
+  interior: {
+    largura: 18, // da parede do fundo (o cenário pintado)
+    fundoZ: -4.5,
+    frenteZ: 7,
+    limites: { minX: -7.6, maxX: 7.6, minZ: -3.2, maxZ: 4 },
+    entrada: { x: 0, z: 1.8 }, // onde a protagonista aparece ao entrar
+    saida: { x: 0, z: 3.9, raio: 1.7 }, // o tapete da porta
+    camera: {
+      fov: 44,
+      fovMaximo: 62,
+      altura: 4.4,
+      distancia: 10.5,
+      olharAltura: 2.6,
+      suavidade: 5,
+      zFixo: 1.5,
+      meiaLargura: 9,
+    },
+  },
 };

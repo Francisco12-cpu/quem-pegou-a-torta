@@ -1,6 +1,10 @@
 // construtor.js — monta o cenário a partir de dados/mundo3d.js, todo gerado por código.
 
 import * as THREE from "../vendor/three.min.js";
+import { criarCasa } from "./casas-papel.js";
+import { dentroDaCaixa } from "./colisao.js";
+
+const FOLGA_FLORES = 1.8; // nenhum tufo nasce colado na casa nem na frente da porta
 
 // números "aleatórios" sempre iguais, pro mundo não mudar a cada visita
 function sorteador(semente) {
@@ -119,7 +123,7 @@ function texturaTufos() {
   return textura;
 }
 
-function criarTufos(dados) {
+function criarTufos(dados, casas) {
   const r = sorteador(dados.tufos.semente);
   const material = new THREE.MeshBasicMaterial({ map: texturaTufos(), alphaTest: 0.5, side: THREE.DoubleSide });
   const grupo = new THREE.Group();
@@ -155,7 +159,8 @@ function criarTufos(dados) {
   }
 
   const m = new THREE.Matrix4();
-  porTipo.forEach((lista, tipo) => {
+  porTipo.forEach((todos, tipo) => {
+    const lista = todos.filter((t) => !casas.some((c) => dentroDaCaixa(t.x, t.z, c, FOLGA_FLORES)));
     if (!lista.length) return;
     const malha = new THREE.InstancedMesh(geometrias[tipo], material, lista.length);
     lista.forEach((t, i) => {
@@ -168,6 +173,10 @@ function criarTufos(dados) {
   return grupo;
 }
 
+// devolve as casas criadas (motor usa pra colisão e portas)
 export function construirMundo(cena, dados) {
-  cena.add(criarChao(dados), criarTufos(dados));
+  const casas = dados.casas.map(criarCasa);
+  cena.add(criarChao(dados), criarTufos(dados, casas));
+  casas.forEach((c) => cena.add(c.grupo));
+  return casas;
 }
