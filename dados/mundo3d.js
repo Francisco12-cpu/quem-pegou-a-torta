@@ -383,16 +383,20 @@ var MUNDO3D = {
   // a Applejack chegando na festa (a porta fica do lado da câmera)
   chegadaApplejack: { de: { x: 0, z: 9 }, ate: { x: 0, z: 2.8 }, velocidade: 3.2 },
 
-  // no fim com a torta, onde cada pônei fica em volta da protagonista, na ordem de `pontos` da
-  // festa (a última é a Applejack)
-  fimNoMundo: [
-    { x: -3.6, z: 0.4 },
-    { x: 3.6, z: 0.4 },
-    { x: -2, z: -2.2 },
-    { x: 2, z: -2.2 },
-    { x: 6.4, z: -0.6 },
-    { x: -6.4, z: -0.6 },
-  ],
+  // No fim com a torta: `distancia` é o quanto a protagonista fica à frente da porta do celeiro,
+  // e `lugares` é onde cada pônei fica em volta dela, na ordem de `pontos` da festa (a última é
+  // a Applejack). z negativo = mais perto do celeiro.
+  fimNoMundo: {
+    distancia: 9,
+    lugares: [
+      { x: -3.2, z: 0.8 },
+      { x: -6.3, z: -0.4 },
+      { x: -1.9, z: -2.8 },
+      { x: 1.9, z: -2.8 },
+      { x: 6.3, z: -0.4 },
+      { x: 3.2, z: 0.8 },
+    ],
+  },
 
   // As casinhas da vila: enfeite (não abrem), todas iguais, mudando só as cores e o lugar.
   // `giro` em graus: 0 = de frente para a câmera.

@@ -407,6 +407,7 @@ var MotorDialogo = (function () {
     elementos.cenario.className = "fundo-" + cena.fundo;
     // `imagemFundo` (opcional): imagem pronta no lugar do fundo da classe (foto da sala 3D)
     elementos.cenario.style.backgroundImage = cena.imagemFundo ? 'url("' + cena.imagemFundo + '")' : "";
+    elementos.jogo.classList.toggle("fundo-foto", !!cena.imagemFundo);
 
     renderizarFalaAtual();
   }

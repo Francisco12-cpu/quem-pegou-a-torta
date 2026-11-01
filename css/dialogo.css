@@ -443,3 +443,11 @@
     transform: none;
   }
 }
+
+/* no fundo com foto da sala 3D, quem não fala fica escuro, nunca transparente */
+#jogo.fundo-foto .personagem.escurecido,
+#jogo.fundo-foto .protagonista-nao-falando,
+#jogo.fundo-foto .escurecido {
+  opacity: 1;
+  filter: saturate(0.75) brightness(0.72);
+}

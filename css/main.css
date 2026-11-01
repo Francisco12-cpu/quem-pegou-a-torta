@@ -446,14 +446,24 @@ kbd {
   transition: transform 1s cubic-bezier(0.45, 0, 0.3, 1);
 }
 
-/* a torta nova, no meio da tela */
+/* escurece um pouco o mundo, pros ingredientes e a torta aparecerem */
+#voo-camada {
+  transition: background 0.5s ease;
+}
+
+#voo-camada.tem-torta {
+  background: rgba(26, 16, 48, 0.5);
+}
+
+/* a torta nova, no alto da tela: não cobre as pôneis */
 #torta-nova {
   position: absolute;
   left: 50%;
-  top: 44%;
-  width: min(46vmin, 340px);
+  top: 30%;
+  width: min(48vmin, 340px);
+  box-sizing: border-box;
   transform: translate(-50%, -50%);
-  padding: 8%;
+  padding: min(7vmin, 40px);
   background: radial-gradient(circle, rgba(255, 233, 150, 0.95) 0%, rgba(255, 212, 121, 0.45) 45%, transparent 70%);
   animation: torta-aparece 0.7s cubic-bezier(0.2, 1.6, 0.4, 1);
 }

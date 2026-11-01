@@ -5,7 +5,8 @@
 var Interface = (function () {
   "use strict";
 
-  var TEMPO_INGREDIENTES_MS = 1800; // o último ingrediente chegou no meio da tela
+  var TEMPO_RODA_MS = 2000; // os ingredientes voam até formar uma roda
+  var TEMPO_JUNTAR_MS = 450; // e se juntam no meio
   var TEMPO_TORTA_MS = 2600; // quanto a torta fica sozinha na tela
 
   var el = {};
@@ -152,8 +153,11 @@ var Interface = (function () {
   function juntarIngredientes(aoTerminar) {
     var jogoRect = $("jogo").getBoundingClientRect();
     var centroX = jogoRect.width / 2;
-    var centroY = jogoRect.height * 0.44;
-    var imagens = ORDEM_INGREDIENTES.map(function (chave, i) {
+    var centroY = jogoRect.height * 0.3;
+    var raio = Math.min(jogoRect.width, jogoRect.height) * 0.17;
+    el.voo.classList.add("tem-torta");
+
+    var itens = ORDEM_INGREDIENTES.map(function (chave, i) {
       var slot = el.contador.querySelector('[data-ingrediente="' + chave + '"]').getBoundingClientRect();
       var img = document.createElement("img");
       img.src = ITENS[chave].imagem;
@@ -162,21 +166,34 @@ var Interface = (function () {
       img.style.top = slot.top - jogoRect.top + "px";
       img.style.width = slot.width + "px";
       img.style.height = slot.height + "px";
-      img.style.transitionDelay = i * 0.22 + "s";
+      img.style.transitionDelay = i * 0.2 + "s";
       el.voo.appendChild(img);
-      var dx = centroX - (slot.left - jogoRect.left + slot.width / 2);
-      var dy = centroY - (slot.top - jogoRect.top + slot.height / 2);
+
+      var origemX = slot.left - jogoRect.left + slot.width / 2;
+      var origemY = slot.top - jogoRect.top + slot.height / 2;
+      var angulo = Math.PI + (i / ORDEM_INGREDIENTES.length) * Math.PI * 2;
+      var alvoX = centroX + Math.cos(angulo) * raio * 1.5;
+      var alvoY = centroY + Math.sin(angulo) * raio * 0.7;
       requestAnimationFrame(function () {
         requestAnimationFrame(function () {
-          img.style.transform = "translate(" + dx + "px, " + dy + "px) scale(2.4) rotate(360deg)";
+          img.style.transform = "translate(" + (alvoX - origemX) + "px, " + (alvoY - origemY) + "px) scale(2.2) rotate(360deg)";
         });
       });
-      return img;
+      return { img: img, paraOCentro: "translate(" + (centroX - origemX) + "px, " + (centroY - origemY) + "px) scale(0.6) rotate(720deg)" };
     });
 
+    // todos na roda: juntam no meio
     setTimeout(function () {
-      imagens.forEach(function (img) {
-        img.remove();
+      itens.forEach(function (item) {
+        item.img.style.transitionDelay = "0s";
+        item.img.style.transitionDuration = TEMPO_JUNTAR_MS / 1000 + "s";
+        item.img.style.transform = item.paraOCentro;
+      });
+    }, TEMPO_RODA_MS);
+
+    setTimeout(function () {
+      itens.forEach(function (item) {
+        item.img.remove();
       });
       Musica.efeito("interagir");
       var torta = document.createElement("div");
@@ -184,12 +201,13 @@ var Interface = (function () {
       torta.innerHTML = '<img src="' + ITENS.torta.imagem + '" alt="' + ITENS.torta.nome + '" draggable="false" />';
       el.voo.appendChild(torta);
       setTimeout(aoTerminar, TEMPO_TORTA_MS);
-    }, TEMPO_INGREDIENTES_MS);
+    }, TEMPO_RODA_MS + TEMPO_JUNTAR_MS);
   }
 
   function esconderTortaNova() {
     var torta = $("torta-nova");
     if (torta) torta.remove();
+    el.voo.classList.remove("tem-torta");
   }
 
   // ---- plaquinha com o nome do lugar ----

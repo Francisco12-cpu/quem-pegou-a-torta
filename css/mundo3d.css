@@ -162,6 +162,11 @@ body.toque #mundo3d-dica {
   display: none;
 }
 
+/* cena sem controle do jogador: nada de dica de teclas */
+#mundo3d-overlay.sem-controle #mundo3d-dica {
+  display: none;
+}
+
 /* ---- marcas acima das pôneis: "Acusar" e exclamação ---- */
 
 #mundo3d-marcas {

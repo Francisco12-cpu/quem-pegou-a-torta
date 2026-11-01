@@ -33,7 +33,7 @@ let protagonista = null;
 let spriteAtual = null;
 let mundoAberto = null;
 let salaDaFesta = null; // um lugar como os outros, mais `sala` (as medidas)
-let saidaDaFesta = null; // onde se fica no mundo aberto, na porta do celeiro
+let saidaDaFesta = null; // onde a protagonista fica no fim com a torta, de frente pro celeiro
 let elenco = []; // as pôneis da festa: [{ dados, ponei }]
 let guiaLigado = true;
 let objetivoFixo = null; // texto que substitui o "Próximo: ..." (final do jogo)
@@ -211,7 +211,11 @@ async function criarMundo() {
     sala: medidasFesta,
   };
   elenco = salaDaFesta.pontos.slice();
-  saidaDaFesta = construido.casas.find((c) => c.dados.fim).saida;
+  const celeiro = construido.casas.find((c) => c.dados.fim);
+  saidaDaFesta = {
+    x: celeiro.saida.x + Math.sin(celeiro.giro) * dados.fimNoMundo.distancia,
+    z: celeiro.saida.z + Math.cos(celeiro.giro) * dados.fimNoMundo.distancia,
+  };
 
   portas = await Promise.all(
     construido.casas.map(async (casa, i) => {
@@ -614,6 +618,7 @@ function fotografar(alvo) {
 
 function ligarSemControle() {
   el.overlay.hidden = false;
+  el.overlay.classList.add("sem-controle");
   palco.ajustar();
   jogador.vx = jogador.vz = 0;
   focoCamera = null;
@@ -625,6 +630,7 @@ function ligarSemControle() {
 
 function ligar() {
   ligarSemControle();
+  el.overlay.classList.remove("sem-controle");
   controles.ligar();
   ativo = true;
 }
@@ -720,7 +726,7 @@ export async function chegarApplejack() {
 export function levarTodasProMundo() {
   objetivoFixo = "";
   elenco.forEach((p, i) => {
-    const lugarDela = dados.fimNoMundo[i % dados.fimNoMundo.length];
+    const lugarDela = dados.fimNoMundo.lugares[i % dados.fimNoMundo.lugares.length];
     p.dados.x = saidaDaFesta.x + lugarDela.x;
     p.dados.z = saidaDaFesta.z + lugarDela.z;
     p.dados.semConversa = true;
