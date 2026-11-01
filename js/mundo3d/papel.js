@@ -146,6 +146,96 @@ export class Folha {
     this.materiais.push(material);
     const malha = new THREE.Mesh(new THREE.PlaneGeometry(largura, altura), material);
     malha.position.set(x, y, z);
+    malha.userData.solta = true; // tem textura própria: não entra em fundirPecas
     return malha;
+  }
+}
+
+// Junta todas as peças de um grupo em uma malha por textura, levando a cor de cada peça para
+// os vértices: uma casa de 60 peças vira 2 ou 3 chamadas de desenho (o que mais pesa no
+// celular). Depois disso as peças não se mexem mais uma a uma. Chamar antes de posicionar o
+// grupo. Devolve os materiais usados agora.
+export function fundirPecas(grupo) {
+  grupo.updateMatrixWorld(true);
+  const inversa = new THREE.Matrix4().copy(grupo.matrixWorld).invert();
+  const paraGrupo = new THREE.Matrix4();
+  const ponto = new THREE.Vector3();
+  const porTextura = new Map();
+  const soltas = [];
+
+  function acrescentar(geometria, material, inicio, quantidade) {
+    const chave = material.map.uuid + "|" + material.alphaTest + "|" + material.fog;
+    if (!porTextura.has(chave)) porTextura.set(chave, { material, posicao: [], uv: [], cor: [] });
+    const destino = porTextura.get(chave);
+    const pos = geometria.attributes.position;
+    const uv = geometria.attributes.uv;
+    const { r, g, b } = material.color;
+    for (let i = inicio; i < inicio + quantidade; i++) {
+      ponto.fromBufferAttribute(pos, i).applyMatrix4(paraGrupo);
+      destino.posicao.push(ponto.x, ponto.y, ponto.z);
+      destino.uv.push(uv.getX(i), uv.getY(i));
+      destino.cor.push(r, g, b);
+    }
+  }
+
+  grupo.traverse((peca) => {
+    if (!peca.isMesh) return;
+    if (peca.userData.solta) {
+      soltas.push(peca);
+      return;
+    }
+    const geometria = peca.geometry.index ? peca.geometry.toNonIndexed() : peca.geometry;
+    paraGrupo.multiplyMatrices(inversa, peca.matrixWorld);
+    if (Array.isArray(peca.material)) {
+      geometria.groups.forEach((g) => acrescentar(geometria, peca.material[g.materialIndex], g.start, g.count));
+    } else {
+      acrescentar(geometria, peca.material, 0, geometria.attributes.position.count);
+    }
+  });
+
+  grupo.clear();
+  const materiais = [];
+  porTextura.forEach(({ material, posicao, uv, cor }) => {
+    const geometria = new THREE.BufferGeometry();
+    geometria.setAttribute("position", new THREE.Float32BufferAttribute(posicao, 3));
+    geometria.setAttribute("uv", new THREE.Float32BufferAttribute(uv, 2));
+    geometria.setAttribute("color", new THREE.Float32BufferAttribute(cor, 3));
+    const unico = material.clone();
+    unico.color.set(0xffffff);
+    unico.vertexColors = true;
+    grupo.add(new THREE.Mesh(geometria, unico));
+    materiais.push(unico);
+  });
+  soltas.forEach((p) => {
+    grupo.add(p);
+    materiais.push(p.material);
+  });
+  return materiais;
+}
+
+// Quadrados de papel em pé, todos numa geometria só (flores, árvores).
+export class Quadros {
+  constructor() {
+    this.posicao = [];
+    this.uv = [];
+  }
+
+  // base centrada em (x, z), girado `angulo` no eixo Y; a textura vai de u0 a u1 na horizontal
+  somar(x, z, largura, altura, angulo = 0, u0 = 0, u1 = 1) {
+    const dx = (Math.cos(angulo) * largura) / 2;
+    const dz = (-Math.sin(angulo) * largura) / 2;
+    const a = [x - dx, 0, z - dz];
+    const b = [x + dx, 0, z + dz];
+    const c = [x + dx, altura, z + dz];
+    const d = [x - dx, altura, z - dz];
+    this.posicao.push(...a, ...b, ...c, ...a, ...c, ...d);
+    this.uv.push(u0, 0, u1, 0, u1, 1, u0, 0, u1, 1, u0, 1);
+  }
+
+  malha(material) {
+    const geometria = new THREE.BufferGeometry();
+    geometria.setAttribute("position", new THREE.Float32BufferAttribute(this.posicao, 3));
+    geometria.setAttribute("uv", new THREE.Float32BufferAttribute(this.uv, 2));
+    return new THREE.Mesh(geometria, material);
   }
 }

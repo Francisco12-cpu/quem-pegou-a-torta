@@ -2,7 +2,7 @@
 // Abrir é com o minigame de sempre: aqui só se desenha.
 
 import * as THREE from "../vendor/three.min.js";
-import { Folha } from "./papel.js";
+import { Folha, fundirPecas } from "./papel.js";
 import { criarSombra } from "./ponei-papel.js";
 
 const MADEIRA = "#a9693f";
@@ -28,6 +28,8 @@ export class BauPapel {
     });
 
     this.corpo.add(f.caixa(0.4, 0.46, 0.08, OURO, 0, 0.72, 0.62), f.disco(0.08, "#4a2a18", 0, 0.74, 0.665));
+
+    fundirPecas(this.corpo);
 
     this.estrela = new THREE.Mesh(new THREE.OctahedronGeometry(0.17), f.material(OURO, 1, true));
     this.estrela.position.y = 2.1;

@@ -456,23 +456,77 @@ kbd {
   pointer-events: auto;
 }
 
-/* ---- aviso de rotação — leve, só sugere girar o celular ---- */
+#menu-instalar[hidden] {
+  display: none;
+}
 
-#aviso-rotacao {
+/* ---- celular em pé: bloqueia o jogo até deitar ---- */
+
+#girar-celular {
   position: fixed;
-  left: 50%;
-  bottom: calc(1.2em + var(--margem-segura-baixo));
-  transform: translateX(-50%);
-  z-index: 95;
-  background: rgba(26, 16, 48, 0.9);
-  box-shadow: 0 0 0 2px var(--dourado);
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6em;
+  padding: 1.5em;
+  background: var(--roxo-noite);
   color: var(--creme);
-  padding: 0.6em 1.1em;
-  border-radius: 999px;
-  font-family: var(--fonte-titulo);
-  font-size: 0.85rem;
   text-align: center;
-  pointer-events: none;
+  touch-action: none;
+}
+
+#girar-celular[hidden] {
+  display: none;
+}
+
+#girar-celular h2 {
+  margin: 0.8em 0 0;
+  font-family: var(--fonte-titulo);
+  font-size: 1.7rem;
+  color: var(--dourado);
+}
+
+#girar-celular p {
+  margin: 0;
+  max-width: 22em;
+  line-height: 1.4;
+}
+
+/* o celular desenhado, girando até deitar */
+.girar-aparelho {
+  position: relative;
+  width: 64px;
+  height: 112px;
+  border-radius: 12px;
+  border: 5px solid var(--creme);
+  background: linear-gradient(180deg, #ff9ccd 0%, var(--rosa) 100%);
+  animation: girar-aparelho 2.2s ease-in-out infinite;
+}
+
+.girar-aparelho::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 5px;
+  width: 22px;
+  height: 4px;
+  margin-left: -11px;
+  border-radius: 2px;
+  background: var(--creme);
+}
+
+@keyframes girar-aparelho {
+  0%,
+  25% {
+    transform: rotate(0deg);
+  }
+  65%,
+  100% {
+    transform: rotate(-90deg);
+  }
 }
 
 /* ---- telas pequenas ---- */

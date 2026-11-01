@@ -3,13 +3,17 @@
 
 import * as THREE from "../vendor/three.min.js";
 
-const DPR_MAXIMO = 2;
+const LONGE = 175; // nada do mundo fica além disso (os morros mais distantes)
+
+export function ehCelular() {
+  return window.matchMedia("(pointer: coarse)").matches;
+}
 
 export function criarPalco(canvas) {
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, DPR_MAXIMO));
+  // serrilhado suave pesa bastante no celular, e a densidade de pixels já disfarça
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: !ehCelular(), powerPreference: "high-performance" });
 
-  const camera = new THREE.PerspectiveCamera(38, 16 / 9, 0.5, 300);
+  const camera = new THREE.PerspectiveCamera(38, 16 / 9, 0.5, LONGE);
   const olhar = new THREE.Vector3();
   let cfg = null;
 
@@ -49,6 +53,12 @@ export function criarPalco(canvas) {
     camera.lookAt(olhar);
   }
 
+  // escala: quantos pixels de verdade por pixel da tela (menos = mais leve, menos nítido)
+  function definirEscala(escala) {
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, escala));
+    ajustar();
+  }
+
   function desenhar(cena) {
     renderer.render(cena, camera);
   }
@@ -59,7 +69,7 @@ export function criarPalco(canvas) {
     return { ...renderer.info.render, geometrias: renderer.info.memory.geometries, texturas: renderer.info.memory.textures };
   }
 
-  return { camera, ajustar, usarCamera, seguir, desenhar, info };
+  return { camera, ajustar, usarCamera, seguir, definirEscala, desenhar, info };
 }
 
 export function criarCenaAberta(dados) {

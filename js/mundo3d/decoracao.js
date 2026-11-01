@@ -2,7 +2,7 @@
 // Tudo gerado por código a partir de dados/mundo3d.js.
 
 import * as THREE from "../vendor/three.min.js";
-import { Folha, sorteador } from "./papel.js";
+import { Folha, Quadros, fundirPecas, sorteador } from "./papel.js";
 
 // distância de (x, z) até o segmento a-b
 function distanciaAoSegmento(x, z, a, b) {
@@ -41,15 +41,15 @@ export function criarCaminhos(c) {
       grupo.add(tira);
     });
   });
+  fundirPecas(grupo);
   return grupo;
 }
 
-// árvore de papel: dois recortes iguais cruzados, pra ter volume de qualquer ângulo
-function texturaArvore() {
-  const canvas = document.createElement("canvas");
-  canvas.width = 256;
-  canvas.height = 320;
-  const g = canvas.getContext("2d");
+// desenho de uma árvore de papel, numa área de 256x320 a partir de (ox, oy)
+function desenharArvore(g, ox, oy, escala) {
+  g.save();
+  g.translate(ox, oy);
+  g.scale(escala, escala);
   g.fillStyle = "#8f6134";
   g.fillRect(112, 190, 32, 130);
 
@@ -74,7 +74,14 @@ function texturaArvore() {
     g.arc(x, y, r, 0, Math.PI * 2);
     g.fill();
   });
+  g.restore();
+}
 
+function texturaArvore() {
+  const canvas = document.createElement("canvas");
+  canvas.width = 256;
+  canvas.height = 320;
+  desenharArvore(canvas.getContext("2d"), 0, 0, 1);
   const textura = new THREE.CanvasTexture(canvas);
   textura.colorSpace = THREE.SRGBColorSpace;
   textura.anisotropy = 4;
@@ -102,32 +109,43 @@ vDistanciaCamera = -mvPosition.z;`
   };
 }
 
-// lista: [{ x, z, escala }]
+// Divide o que está espalhado em setores: cada um é uma malha só, e o que estiver fora de
+// vista nem é desenhado. Devolve [{ malha, x, z }] (o motor esconde os setores muito longe).
+export function emSetores(itens, tamanhoSetor, somar, material) {
+  const setores = new Map();
+  itens.forEach((item) => {
+    const chave = Math.floor(item.x / tamanhoSetor) + "," + Math.floor(item.z / tamanhoSetor);
+    if (!setores.has(chave)) setores.set(chave, { quadros: new Quadros(), somaX: 0, somaZ: 0, n: 0 });
+    const s = setores.get(chave);
+    somar(s.quadros, item);
+    s.somaX += item.x;
+    s.somaZ += item.z;
+    s.n++;
+  });
+  return [...setores.values()].map((s) => ({
+    malha: s.quadros.malha(material),
+    x: s.somaX / s.n,
+    z: s.somaZ / s.n,
+  }));
+}
+
+// lista: [{ x, z, escala }]; devolve os setores de árvores
 export function criarArvores(lista, cfg) {
   const material = new THREE.MeshBasicMaterial({ map: texturaArvore(), alphaTest: 0.5, side: THREE.DoubleSide });
   dissolverPertoDaCamera(material, cfg);
-  const geometria = new THREE.PlaneGeometry(5, 6.25);
-  geometria.translate(0, 3.125, 0);
-
-  const malha = new THREE.InstancedMesh(geometria, material, lista.length * 2);
-  const m = new THREE.Matrix4();
-  const giro = new THREE.Quaternion();
-  const eixo = new THREE.Vector3(0, 1, 0);
-  const pos = new THREE.Vector3();
-  const escala = new THREE.Vector3();
-  lista.forEach((a, i) => {
-    pos.set(a.x, 0, a.z);
-    escala.setScalar(a.escala);
-    [0.45, 0.45 + Math.PI / 2].forEach((angulo, n) => {
-      giro.setFromAxisAngle(eixo, angulo);
-      malha.setMatrixAt(i * 2 + n, m.compose(pos, giro, escala));
-    });
-  });
-  malha.frustumCulled = false;
-  return malha;
+  return emSetores(
+    lista,
+    cfg.tamanhoSetor,
+    (quadros, a) => {
+      // dois recortes cruzados, pra ter volume
+      quadros.somar(a.x, a.z, 5 * a.escala, 6.25 * a.escala, 0.45);
+      quadros.somar(a.x, a.z, 5 * a.escala, 6.25 * a.escala, 0.45 + Math.PI / 2);
+    },
+    material
+  );
 }
 
-// sorteia árvores em lugares livres, mais um anel fechando a borda do mapa
+// sorteia as árvores do meio do mapa, em lugares livres
 export function sortearArvores(dados, livre) {
   const cfg = dados.arvores;
   const r = sorteador(cfg.semente);
@@ -138,17 +156,38 @@ export function sortearArvores(dados, livre) {
     const z = (r() * 2 - 1) * (metade - 4);
     if (livre(x, z, cfg.folga)) lista.push({ x, z, escala: 0.9 + r() * 0.5 });
   }
-  const borda = metade + 3;
-  for (let p = -borda; p < borda; p += cfg.passoBorda) {
-    const variacao = () => (r() - 0.5) * 3;
-    [
-      [p, -borda],
-      [p, borda],
-      [-borda, p],
-      [borda, p],
-    ].forEach(([x, z]) => lista.push({ x: x + variacao(), z: z + variacao(), escala: 1.1 + r() * 0.5 }));
-  }
   return lista;
+}
+
+// O fundo do mapa: em vez de centenas de árvores, uma faixa de papel com várias desenhadas
+// numa textura só. Fica nos três lados que a câmera enxerga (ela nunca olha para trás).
+export function criarFaixaDeArvores(dados) {
+  const cfg = dados.arvores;
+  const canvas = document.createElement("canvas");
+  canvas.width = 1024;
+  canvas.height = 256;
+  const g = canvas.getContext("2d");
+  const r = sorteador(cfg.semente + 1);
+  for (let i = 0; i < 6; i++) {
+    const escala = 0.62 + r() * 0.16;
+    desenharArvore(g, i * 170 + (r() - 0.5) * 16 - 10, 256 - 320 * escala, escala);
+  }
+  const textura = new THREE.CanvasTexture(canvas);
+  textura.colorSpace = THREE.SRGBColorSpace;
+  textura.wrapS = THREE.RepeatWrapping;
+  textura.anisotropy = 4;
+  const material = new THREE.MeshBasicMaterial({ map: textura, alphaTest: 0.5, side: THREE.DoubleSide });
+
+  const metade = dados.tamanho / 2 + 5;
+  const comprimento = metade * 2 + 30;
+  const repeticoes = comprimento / cfg.larguraFaixa;
+  const quadros = new Quadros();
+  quadros.somar(0, -metade, comprimento, cfg.alturaFaixa, 0, 0, repeticoes);
+  quadros.somar(-metade, 0, comprimento, cfg.alturaFaixa, Math.PI / 2, 0, repeticoes);
+  quadros.somar(metade, 0, comprimento, cfg.alturaFaixa, Math.PI / 2, 0, repeticoes);
+  const malha = quadros.malha(material);
+  malha.frustumCulled = false;
+  return malha;
 }
 
 function recorteMorro(cor) {
@@ -183,6 +222,7 @@ export function criarMorros(cfg) {
       grupo.add(morro);
     }
   });
+  fundirPecas(grupo);
   return grupo;
 }
 
@@ -242,6 +282,7 @@ export function criarFonte(fonte) {
     f.cilindro(0.85, 0.85, 0.05, "#8fd8f2", 0, 2.88, 0),
     f.esfera(0.32, "#ffb7d9", 0, 3.25, 0)
   );
+  fundirPecas(grupo);
   grupo.position.set(fonte.x, 0, fonte.z);
   return grupo;
 }

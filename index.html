@@ -10,6 +10,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Quem Pegou a Torta?</title>
   <link rel="icon" type="image/png" href="assets/itens/torta.png" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="assets/icones/apple-180.png" />
 
   <link rel="stylesheet" href="css/reset.css" />
   <link rel="stylesheet" href="css/main.css" />
@@ -119,6 +121,7 @@
         <div class="menu-botoes">
           <button id="menu-jogar" class="botao principal" type="button">Jogar</button>
           <button id="menu-como-jogar" class="botao secundario" type="button">Como jogar</button>
+          <button id="menu-instalar" class="botao secundario" type="button" hidden>Instalar o jogo</button>
           <button id="menu-creditos" class="botao secundario" type="button">Créditos</button>
         </div>
       </div>
@@ -290,7 +293,12 @@
     <div id="transicao"></div>
   </div>
 
-  <div id="aviso-rotacao" hidden>Gire o celular para ver melhor</div>
+  <!-- no celular em pé o jogo não continua: esta tela fica por cima de tudo até deitar -->
+  <div id="girar-celular" hidden>
+    <div class="girar-aparelho" aria-hidden="true"></div>
+    <h2>Deite o celular</h2>
+    <p>O jogo só funciona com o celular na horizontal. Assim que você girar, ele continua.</p>
+  </div>
 
   <!-- dados (conteúdo) — carregados antes do motor -->
   <script src="dados/personagens.js"></script>
@@ -313,6 +321,7 @@
 
   <!-- motor (lógica) -->
   <script src="js/vendor/profanity-br.js"></script>
+  <script src="js/pwa.js"></script>
   <script src="js/estado.js"></script>
   <script src="js/visual-personagem.js"></script>
   <script src="js/responsivo.js"></script>

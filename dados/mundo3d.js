@@ -33,14 +33,16 @@ var MUNDO3D = {
   // grupinhos de flores (cada um com uma ou duas cores)
   canteiros: { quantidade: 110, flores: 11, raio: 2.6, semente: 11 },
 
-  // `folga`: distância mínima das casas (das trilhas é metade); `passoBorda`: distância entre
-  // as árvores do anel que fecha o mapa; `dissolve...`: perto da câmera a árvore some em
-  // pontinhos, pra nunca tapar a pônei (a câmera fica a uns 13 de distância dela)
+  // `folga`: distância mínima das casas (das trilhas é metade); `larguraFaixa` e `alturaFaixa`:
+  // a faixa de árvores que fecha o mapa (uma textura só); `dissolve...`: perto da câmera a
+  // árvore some em pontinhos, pra nunca tapar a pônei (a câmera fica a uns 13 dela)
   arvores: {
     quantidade: 55,
     semente: 21,
     folga: 7,
-    passoBorda: 5,
+    tamanhoSetor: 30,
+    larguraFaixa: 34,
+    alturaFaixa: 8.5,
     raioColisao: 0.8,
     dissolvePerto: 8,
     dissolveLonge: 13,
@@ -48,6 +50,24 @@ var MUNDO3D = {
   nuvens: { quantidade: 12, altura: 24 },
   morros: { quantidade: 12, raio: 118, cores: ["#a8d8a0", "#b9e2c8"] },
   fonte: { x: 0, z: -2, raio: 2.4 },
+
+  // Desempenho. Flores e árvores ficam em setores: o que está fora de vista não é desenhado.
+  //   visao / visaoCurta — até onde se desenha flores e árvores
+  //   escalas...         — pixels por ponto da tela, do melhor pro mais leve. Abaixo de
+  //                        `fpsMinimo` o jogo desce um degrau sozinho.
+  //   nivelVisaoCurta    — a partir deste degrau, usa a `visaoCurta`
+  qualidade: {
+    automatica: true,
+    tamanhoSetor: 24,
+    tufosNoCelular: 0.65,
+    visao: 92,
+    visaoCurta: 58,
+    fpsMinimo: 26,
+    janelaMedida: 2.5, // segundos
+    escalasCelular: [1.5, 1.25, 1, 0.8],
+    escalasComputador: [2, 1.5, 1, 0.8],
+    nivelVisaoCurta: 2,
+  },
 
   raioInteracao: 3.4, // distância pra poder interagir
   raioColisao: 1.1, // a protagonista não atravessa as pôneis

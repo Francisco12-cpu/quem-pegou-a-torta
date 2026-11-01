@@ -3,7 +3,7 @@
 
 import * as THREE from "../vendor/three.min.js";
 import { dentroDaCaixa } from "./colisao.js";
-import { Folha } from "./papel.js";
+import { Folha, fundirPecas } from "./papel.js";
 
 const ALTURA_BALAO_PORTA = 3.6;
 const DISTANCIA_FORA = 1.4; // da parede até onde se fica pra entrar pela porta
@@ -253,6 +253,7 @@ export function criarCasa(dadosCasa) {
   const folha = new Folha();
   const { grupo, largura, profundidade } = TIPOS[dadosCasa.tipo](folha, dadosCasa);
   const giro = THREE.MathUtils.degToRad(dadosCasa.giro || 0);
+  const materiais = fundirPecas(grupo);
 
   grupo.position.set(dadosCasa.x, 0, dadosCasa.z);
   grupo.rotation.y = giro;
@@ -271,7 +272,7 @@ export function criarCasa(dadosCasa) {
     meiaLargura: largura / 2,
     meiaProfundidade: profundidade / 2,
     altura: 12,
-    materiais: folha.materiais,
+    materiais,
     opacidade: 1,
     porta: { ...naFrente(profundidade / 2 + DISTANCIA_FORA / 2), altura: ALTURA_BALAO_PORTA },
     saida: naFrente(profundidade / 2 + DISTANCIA_FORA),

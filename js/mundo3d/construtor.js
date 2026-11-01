@@ -8,11 +8,14 @@ import {
   criarCaminhos,
   criarFonte,
   criarMorros,
+  criarFaixaDeArvores,
   criarNuvens,
+  emSetores,
   pertoDeCaminho,
   sortearArvores,
 } from "./decoracao.js";
-import { Folha, sorteador } from "./papel.js";
+import { ehCelular } from "./cena.js";
+import { Folha, fundirPecas, sorteador } from "./papel.js";
 
 const FOLGA_FLORES = 1.8; // nenhum tufo nasce colado na casa nem na frente da porta
 
@@ -124,51 +127,35 @@ function texturaTufos() {
 function criarTufos(dados, livre) {
   const r = sorteador(dados.tufos.semente);
   const material = new THREE.MeshBasicMaterial({ map: texturaTufos(), alphaTest: 0.5, side: THREE.DoubleSide });
-  const grupo = new THREE.Group();
-  const porTipo = [];
-  const geometrias = [];
-  for (let i = 0; i < TIPOS_TUFO; i++) {
-    const g = new THREE.PlaneGeometry(1, 1);
-    g.translate(0, 0.5, 0);
-    const uv = g.attributes.uv;
-    for (let n = 0; n < uv.count; n++) uv.setX(n, (i + uv.getX(n)) / TIPOS_TUFO);
-    geometrias.push(g);
-    porTipo.push([]);
-  }
+  const fator = ehCelular() ? dados.qualidade.tufosNoCelular : 1;
 
   const florAoAcaso = () => 1 + Math.floor(r() * CORES_FLOR.length);
   const metade = dados.tamanho / 2;
+  const itens = [];
 
-  for (let i = 0; i < dados.tufos.quantidade; i++) {
+  for (let i = 0; i < dados.tufos.quantidade * fator; i++) {
     const tipo = r() < dados.tufos.flores ? florAoAcaso() : 0;
-    porTipo[tipo].push({ x: (r() * 2 - 1) * metade, z: (r() * 2 - 1) * metade, s: 0.7 + r() * 0.6 });
+    itens.push({ tipo, x: (r() * 2 - 1) * metade, z: (r() * 2 - 1) * metade, s: 0.7 + r() * 0.6 });
   }
 
   const c = dados.canteiros;
-  for (let i = 0; i < c.quantidade; i++) {
+  for (let i = 0; i < c.quantidade * fator; i++) {
     const cx = (r() * 2 - 1) * metade;
     const cz = (r() * 2 - 1) * metade;
     const cores = [florAoAcaso(), florAoAcaso()];
     for (let n = 0; n < c.flores; n++) {
       const a = r() * Math.PI * 2;
       const d = Math.sqrt(r()) * c.raio;
-      porTipo[cores[n % 2]].push({ x: cx + Math.cos(a) * d, z: cz + Math.sin(a) * d, s: 0.65 + r() * 0.5 });
+      itens.push({ tipo: cores[n % 2], x: cx + Math.cos(a) * d, z: cz + Math.sin(a) * d, s: 0.65 + r() * 0.5 });
     }
   }
 
-  const m = new THREE.Matrix4();
-  porTipo.forEach((todos, tipo) => {
-    const lista = todos.filter((t) => livre(t.x, t.z, FOLGA_FLORES));
-    if (!lista.length) return;
-    const malha = new THREE.InstancedMesh(geometrias[tipo], material, lista.length);
-    lista.forEach((t, i) => {
-      m.makeScale(t.s, t.s, t.s).setPosition(t.x, 0, t.z);
-      malha.setMatrixAt(i, m);
-    });
-    malha.frustumCulled = false;
-    grupo.add(malha);
-  });
-  return grupo;
+  return emSetores(
+    itens.filter((t) => livre(t.x, t.z, FOLGA_FLORES)),
+    dados.qualidade.tamanhoSetor,
+    (quadros, t) => quadros.somar(t.x, t.z, t.s, t.s, 0, t.tipo / TIPOS_TUFO, (t.tipo + 1) / TIPOS_TUFO),
+    material
+  );
 }
 
 // chão recortado de uma área (a praça): dois círculos de cartolina deitados
@@ -178,12 +165,14 @@ function criarChaoDeArea(area) {
   const borda = f.disco(area.raio, area.corBorda);
   const miolo = f.disco(area.raio * 0.86, area.chao, 0, 0, 0.012);
   grupo.add(borda, miolo);
+  fundirPecas(grupo);
   grupo.rotation.x = -Math.PI / 2;
   grupo.position.set(area.x, 0.012, area.z);
   return grupo;
 }
 
-// devolve o que o motor precisa: casas (colisão e portas), sólidos redondos e nuvens
+// devolve o que o motor precisa: casas (colisão e portas), sólidos redondos, nuvens e os
+// setores de flores e árvores (ele esconde os que estiverem muito longe)
 export function construirMundo(cena, dados) {
   const casas = dados.casas.map(criarCasa);
 
@@ -194,7 +183,10 @@ export function construirMundo(cena, dados) {
     !pertoDeCaminho(x, z, dados.caminhos, folga * 0.5);
 
   const arvores = sortearArvores(dados, livre);
-  cena.add(criarChao(dados), criarCaminhos(dados.caminhos), criarTufos(dados, livre), criarArvores(arvores, dados.arvores));
+  const setores = [...criarTufos(dados, livre), ...criarArvores(arvores, dados.arvores)];
+  setores.forEach((s) => cena.add(s.malha));
+
+  cena.add(criarChao(dados), criarCaminhos(dados.caminhos), criarFaixaDeArvores(dados));
   cena.add(criarMorros(dados.morros), criarFonte(dados.fonte));
   casas.forEach((c) => cena.add(c.grupo));
   dados.areas.forEach((a) => {
@@ -203,5 +195,5 @@ export function construirMundo(cena, dados) {
 
   const solidos = arvores.map((a) => ({ x: a.x, z: a.z, raio: dados.arvores.raioColisao }));
   solidos.push({ x: dados.fonte.x, z: dados.fonte.z, raio: dados.fonte.raio + 0.8 });
-  return { casas, solidos, nuvens: criarNuvens(dados.nuvens, cena, dados.tamanho) };
+  return { casas, solidos, setores, nuvens: criarNuvens(dados.nuvens, cena, dados.tamanho) };
 }

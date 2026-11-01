@@ -845,12 +845,16 @@ ICONES = {
 }
 
 ESCALA_ICONE = 8  # 16px de pixel art -> 128px; o CSS reduz sem borrar (image-rendering: pixelated)
+# os ingredientes têm arte própria, em 32x32: ferramentas/desenhar-itens.py
+ICONES_COM_ARTE_PROPRIA = ("farinha", "maca", "canela", "mel")
 
 
 def preparar_icones():
     pasta = DESTINO / "itens"
     pasta.mkdir(parents=True, exist_ok=True)
     for nome, grade in ICONES.items():
+        if nome in ICONES_COM_ARTE_PROPRIA:
+            continue
         largura = max(len(linha) for linha in grade)
         img = Image.new("RGBA", (largura, len(grade)), (0, 0, 0, 0))
         px = img.load()

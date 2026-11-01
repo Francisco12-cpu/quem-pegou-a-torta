@@ -9,7 +9,7 @@
 import * as THREE from "../vendor/three.min.js";
 import { BauPapel } from "./bau-papel.js";
 import { atualizarOpacidade } from "./casas-papel.js";
-import { criarCenaAberta, criarPalco } from "./cena.js";
+import { criarCenaAberta, criarPalco, ehCelular } from "./cena.js";
 import { empurrarDeCaixa, empurrarDeCirculo } from "./colisao.js";
 import { construirMundo } from "./construtor.js";
 import { Controles } from "./controles.js";
@@ -33,6 +33,10 @@ let spriteAtual = null;
 let mundoAberto = null;
 let portas = []; // um ponto de porta por casa, na mesma ordem de dados.casas
 let nuvens = [];
+let setores = []; // [{ malha, x, z }]: flores e árvores, por pedaço do mapa
+let nivelQualidade = 0;
+let distanciaVisao = 0;
+const medidor = { tempo: 0, quadros: 0 };
 let setaGuia = null;
 let lugar = null;
 let pontoPerto = null;
@@ -63,6 +67,7 @@ function montar() {
     aviso: document.getElementById("mundo3d-aviso"),
   };
   palco = criarPalco(el.canvas);
+  aplicarQualidade();
   controles = new Controles(el.canvas, el.joystick, el.pino, interagir);
   el.acao.addEventListener("click", interagir);
   el.balao.addEventListener("click", interagir);
@@ -148,6 +153,7 @@ async function criarMundo() {
   const cena = criarCenaAberta(dados);
   const construido = construirMundo(cena, dados);
   nuvens = construido.nuvens;
+  setores = construido.setores;
   setaGuia = criarSetaGuia(cena);
 
   const metade = dados.tamanho / 2;
@@ -354,6 +360,39 @@ function atualizarNuvens(dt) {
   });
 }
 
+// ---- qualidade: se o aparelho não dá conta, baixa sozinho ----
+
+function niveisDeQualidade() {
+  return ehCelular() ? dados.qualidade.escalasCelular : dados.qualidade.escalasComputador;
+}
+
+function aplicarQualidade() {
+  const q = dados.qualidade;
+  palco.definirEscala(niveisDeQualidade()[nivelQualidade]);
+  distanciaVisao = nivelQualidade >= q.nivelVisaoCurta ? q.visaoCurta : q.visao;
+}
+
+function medirDesempenho(tempoReal) {
+  const q = dados.qualidade;
+  medidor.tempo += tempoReal;
+  medidor.quadros++;
+  if (medidor.tempo < q.janelaMedida) return;
+  const fps = medidor.quadros / medidor.tempo;
+  medidor.tempo = medidor.quadros = 0;
+  if (q.automatica && fps < q.fpsMinimo && nivelQualidade < niveisDeQualidade().length - 1) {
+    nivelQualidade++;
+    aplicarQualidade();
+  }
+}
+
+// setores longe demais nem entram na conta (os fora da tela o Three.js já ignora sozinho)
+function atualizarSetores() {
+  const p = palco.camera.position;
+  setores.forEach((s) => {
+    s.malha.visible = Math.hypot(s.x - p.x, s.z - p.z) < distanciaVisao;
+  });
+}
+
 function atualizar(dt) {
   moverJogador(dt);
   protagonista.grupo.position.set(jogador.x, 0, jogador.z);
@@ -370,16 +409,21 @@ function atualizar(dt) {
     p.ponei.atualizar(dt, 0, 0, dados.velocidade, palco.camera);
   });
   lugar.casas.forEach((c) => atualizarOpacidade(c, jogador, palco.camera.position, dt));
-  if (lugar === mundoAberto) atualizarNuvens(dt);
+  if (lugar === mundoAberto) {
+    atualizarNuvens(dt);
+    atualizarSetores();
+  }
   atualizarSetaGuia();
   posicionarBalao();
 }
 
 function quadro(t) {
   rafId = requestAnimationFrame(quadro);
-  const dt = Math.max(0, Math.min(DT_MAXIMO, (t - ultimoT) / 1000));
+  const tempoReal = Math.max(0, (t - ultimoT) / 1000);
   ultimoT = t;
-  atualizar(dt);
+  if (document.body.classList.contains("precisa-girar")) return; // em pé: o jogo fica parado
+  medirDesempenho(tempoReal);
+  atualizar(Math.min(DT_MAXIMO, tempoReal));
   palco.desenhar(lugar.cena);
 }
 
