@@ -110,6 +110,16 @@ export class Folha {
     return malha;
   }
 
+  // recorte livre; pontos: [[x, y], ...]
+  poligono(pontos, cor, x = 0, y = 0, z = 0) {
+    const forma = new THREE.Shape();
+    pontos.forEach(([px, py], i) => (i ? forma.lineTo(px, py) : forma.moveTo(px, py)));
+    forma.closePath();
+    const malha = new THREE.Mesh(new THREE.ShapeGeometry(forma), this.material(cor, 1, true));
+    malha.position.set(x, y, z);
+    return malha;
+  }
+
   cilindro(raioTopo, raioBase, altura, cor, x = 0, y = 0, z = 0) {
     const lados = Math.max(raioTopo, raioBase) < 0.5 ? 10 : 20;
     const geometria = new THREE.CylinderGeometry(raioTopo, raioBase, altura, lados);

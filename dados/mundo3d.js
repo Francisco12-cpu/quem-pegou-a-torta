@@ -111,8 +111,9 @@ var MUNDO3D = {
   //   exige    — id da pônei com quem é preciso ter conversado para a porta abrir
   //   giro     — graus; 0 = porta virada para a câmera. Use de -90 a 90: a câmera não gira,
   //              então uma porta virada para o fundo ficaria escondida.
-  //   interior — a sala: `fundo` é o cenário pintado (sem ele, desenha o céu de nuvens),
-  //              `pontos` são as pôneis e os baús lá dentro
+  //   interior — a sala de papel: `largura` e `fundoZ` (tamanho, opcionais), `parede`, `piso`,
+  //              `moveis` (peças do kit em js/mundo3d/moveis-papel.js; x e z no chão da sala,
+  //              z mais negativo = mais perto da parede do fundo), `pontos` (pôneis e baús)
   //   fim      — sem interior: passar pela porta encerra a exploração (vai para o confronto)
   casas: [
     {
@@ -166,12 +167,40 @@ var MUNDO3D = {
       z: 8,
       giro: 20,
       interior: {
-        fundo: "assets/cenarios/biblioteca-twilight.png",
-        corChao: "#b13044",
-        corParede: "#8b4044",
+        // a maior sala: pé-direito de árvore e estantes até o alto
+        largura: 26,
+        fundoZ: -8,
+        corTapete: "#c8a2f0",
+        parede: {
+          corA: "#d9a86c",
+          corB: "#cf9a5e",
+          corDetalhe: "#c28a50",
+          corLambri: "#8a5a3a",
+          corMoldura: "#ffd479",
+          lambri: 1.5,
+        },
+        piso: { tipo: "tabuas", corA: "#b87a4a", corB: "#a9693f", corSombra: "#7a4a2a", ladrilho: 5 },
+        moveis: [
+          { tipo: "estante", x: -10.5, z: -7.4, largura: 4.6, semente: 1 },
+          { tipo: "estante", x: -5.8, z: -7.4, largura: 4.6, semente: 3 },
+          { tipo: "janela", x: 0, y: 2.4, z: -7.93, cor: "#c8a2f0", corForte: "#8a5bd6" },
+          { tipo: "estante", x: 5.8, z: -7.4, largura: 4.6, semente: 2 },
+          { tipo: "estante", x: 10.5, z: -7.4, largura: 4.6, altura: 4.8, semente: 4 },
+          { tipo: "escadaria", x: 11.3, z: -2.2 },
+          { tipo: "quadro", x: 12.9, y: 5.2, z: 1.8, giro: -90 },
+          { tipo: "tapete", x: -4, z: -2.2, raio: 3.4, cor: "#8a5bd6", corMeio: "#ffd479", corCentro: "#c8a2f0" },
+          { tipo: "mesaDeLeitura", x: -4, z: -2.2 },
+          { tipo: "banqueta", x: -6.5, z: -0.4, cor: "#8a5bd6" },
+          { tipo: "banqueta", x: -1.6, z: -0.4, cor: "#8a5bd6" },
+          { tipo: "globo", x: 2.2, z: -5.6 },
+          { tipo: "poltrona", x: -11.2, z: -2.6, giro: 90 },
+          { tipo: "pilhaDeLivros", x: -8.8, z: -5.3, quantos: 7 },
+          { tipo: "pilhaDeLivros", x: 8.4, z: 0.5, quantos: 5 },
+          { tipo: "planta", x: 8.6, z: -5.4 },
+        ],
         pontos: [
-          { id: "twilight", tipo: "ponei", tela: "twilight", x: 3, z: -1.6 },
-          { id: "bau-twilight", tipo: "bau", bau: "twilight", x: -4.6, z: -1.8 },
+          { id: "twilight", tipo: "ponei", tela: "twilight", x: 4.4, z: -3.2 },
+          { id: "bau-twilight", tipo: "bau", bau: "twilight", x: -9.4, z: 1.2 },
         ],
       },
     },
@@ -185,12 +214,36 @@ var MUNDO3D = {
       z: -22,
       giro: 30,
       interior: {
-        fundo: "assets/cenarios/atelie-rarity.png",
-        corChao: "#ebdfeb",
-        corParede: "#91b0c5",
+        // sala de costura elegante: lilás, dourado e muito tecido
+        largura: 23,
+        fundoZ: -7,
+        corTapete: "#c8a2f0",
+        parede: {
+          corA: "#ecdcf7",
+          corB: "#f7effc",
+          corDetalhe: "#d6bdf0",
+          corLambri: "#a884d8",
+          corMoldura: "#ffd479",
+          lambri: 1.5,
+        },
+        piso: { corA: "#e6d6f7", corB: "#fbf7ff", corSombra: "#bda6d6", ladrilho: 2.6 },
+        moveis: [
+          { tipo: "espelho", x: -9.2, z: -6.85 },
+          { tipo: "araraDeRoupas", x: -4, z: -6, largura: 5 },
+          { tipo: "janela", x: -4, y: 3.8, z: -6.93, altura: 2.2, cor: "#e6d6f7", corForte: "#a884d8" },
+          { tipo: "penteadeira", x: 1.9, z: -6.2 },
+          { tipo: "provador", x: 8, z: -5.8 },
+          { tipo: "rolosDeTecido", x: 10.9, z: -0.8, giro: -90 },
+          { tipo: "tapete", x: -5, z: -1.5, raio: 3.1, cor: "#a884d8", corMeio: "#ffd479", corCentro: "#e6d6f7" },
+          { tipo: "pedestal", x: -5, z: -1.5 },
+          { tipo: "manequim", x: -5, y: 0.6, z: -1.5, cor: "#ff9ccd", corBusto: "#ff6fb0" },
+          { tipo: "manequim", x: -10, z: -3.4, cor: "#8fc7ff", corBusto: "#4a9be8" },
+          { tipo: "manequim", x: 5.1, z: -2.6, cor: "#ffd479", corBusto: "#f2b13c" },
+          { tipo: "vaso", x: -10.4, z: 1.6, cor: "#a884d8" },
+        ],
         pontos: [
-          { id: "bau-rarity", tipo: "bau", bau: "rarity", x: -4.6, z: -1.8 },
-          { id: "rarity", tipo: "ponei", tela: "rarity", x: 3, z: -1.6 },
+          { id: "rarity", tipo: "ponei", tela: "rarity", x: 1.4, z: -3.4 },
+          { id: "bau-rarity", tipo: "bau", bau: "rarity", x: 7.4, z: 1.2 },
         ],
       },
     },
@@ -204,11 +257,31 @@ var MUNDO3D = {
       z: -30,
       giro: 0,
       interior: {
-        corChao: "#eef8ff",
-        corParede: "#8fd0ef",
+        // a menor e mais simples: céu, nuvens e pouca coisa, bem do jeito dela
+        largura: 17,
+        fundoZ: -5.5,
+        corTapete: "#5bc8f2",
+        parede: {
+          corA: "#bfe8ff",
+          corB: "#d6f1ff",
+          corDetalhe: "#ffffff",
+          corLambri: "#ffffff",
+          corMoldura: "#ffd479",
+          lambri: 1.1,
+        },
+        piso: { tipo: "nuvens", corA: "#a9dcf7", corB: "#c4e9fb", corSombra: "#86c3e6", ladrilho: 7 },
+        moveis: [
+          { tipo: "camaDeNuvem", x: -4.6, z: -3.5 },
+          { tipo: "janela", x: -4.6, y: 3.2, z: -5.43, altura: 2.4, largura: 3, cor: "#5bc8f2", corForte: "#4a9be8" },
+          { tipo: "posterRaio", x: 0.5, y: 3.6, z: -5.45 },
+          { tipo: "trofeus", x: 5, z: -4.8 },
+          { tipo: "halteres", x: 7, z: -1.2 },
+          { tipo: "nuvemPuff", x: -7.2, z: 1.8 },
+          { tipo: "nuvemPuff", x: 6.9, z: 2.4, escala: 0.8 },
+        ],
         pontos: [
-          { id: "bau-rainbow-dash", tipo: "bau", bau: "rainbow-dash", x: -4.6, z: -1.8 },
-          { id: "rainbow-dash", tipo: "ponei", tela: "rainbow-dash", x: 3, z: -1.6 },
+          { id: "bau-rainbow-dash", tipo: "bau", bau: "rainbow-dash", x: -3.4, z: 0.6 },
+          { id: "rainbow-dash", tipo: "ponei", tela: "rainbow-dash", x: 3.6, z: -2 },
         ],
       },
     },
@@ -222,12 +295,36 @@ var MUNDO3D = {
       z: -36,
       giro: -25,
       interior: {
-        fundo: "assets/cenarios/casa-fluttershy.png",
-        corChao: "#97ba66",
-        corParede: "#6f573b",
+        // aconchegante: madeira, verde, plantas e bichinhos
+        largura: 20,
+        fundoZ: -6.5,
+        corTapete: "#a5d884",
+        parede: {
+          corA: "#e6f2c8",
+          corB: "#f2f7dc",
+          corDetalhe: "#c9e3a0",
+          corLambri: "#c9a36e",
+          corMoldura: "#fff3dc",
+          lambri: 1.6,
+        },
+        piso: { tipo: "tabuas", corA: "#d9b478", corB: "#cca467", corSombra: "#9c7a4c", ladrilho: 5 },
+        moveis: [
+          { tipo: "planta", x: -8.4, z: -5.2 },
+          { tipo: "sofa", x: -4.1, z: -5.1 },
+          { tipo: "janela", x: -4.1, y: 2.7, z: -6.43, altura: 2.8, cor: "#a5d884", corForte: "#6fb04f" },
+          { tipo: "lareira", x: 3.6, z: -5.8 },
+          { tipo: "quadro", x: 8.2, y: 4, z: -6.43, cor: "#e6f2c8" },
+          { tipo: "prateleira", x: 9.55, y: 3.3, z: -1, giro: -90 },
+          { tipo: "tapete", x: -2.6, z: -1.6, raio: 2.8, cor: "#6fb04f", corMeio: "#fff3dc", corCentro: "#a5d884" },
+          { tipo: "mesinha", x: -2.6, z: -1.6 },
+          { tipo: "cesta", x: 7.6, z: -3.8 },
+          { tipo: "cesta", x: -8, z: 0.4 },
+          { tipo: "gaiola", x: -8.5, y: 6.5, z: -2.6 },
+          { tipo: "planta", x: 8.5, z: 1.6, cor: "#d9a441" },
+        ],
         pontos: [
-          { id: "bau-fluttershy", tipo: "bau", bau: "fluttershy", x: -4.6, z: -1.8 },
-          { id: "fluttershy", tipo: "ponei", tela: "fluttershy", x: 3, z: -1.6 },
+          { id: "fluttershy", tipo: "ponei", tela: "fluttershy", x: 0.2, z: -3.4 },
+          { id: "bau-fluttershy", tipo: "bau", bau: "fluttershy", x: 5.4, z: 1.6 },
         ],
       },
     },
@@ -244,13 +341,13 @@ var MUNDO3D = {
     },
   ],
 
-  // medidas das salas de papel (as casas com `moveis`)
+  // medidas comuns das salas (largura e fundoZ podem mudar em cada casa)
   salaPapel: {
     largura: 20,
     altura: 8,
     fundoZ: -7,
     frenteZ: 8,
-    limites: { minX: -9.1, maxX: 9.1, minZ: -5.6, maxZ: 4.4 },
+    maxZ: 4.4, // até onde se anda em direção à câmera
     entrada: { x: 0, z: 2.4 },
     saida: { x: 0, z: 4.3, raio: 1.7 },
     camera: {
@@ -262,26 +359,6 @@ var MUNDO3D = {
       suavidade: 5,
       zFixo: 0.6,
       meiaLargura: 10,
-    },
-  },
-
-  // medidas iguais em todas as salas com cenário pintado
-  interior: {
-    largura: 18, // da parede do fundo (o cenário pintado)
-    fundoZ: -4.5,
-    frenteZ: 7,
-    limites: { minX: -7.6, maxX: 7.6, minZ: -3.2, maxZ: 4 },
-    entrada: { x: 0, z: 1.8 }, // onde a protagonista aparece ao entrar
-    saida: { x: 0, z: 3.9, raio: 1.7 }, // o tapete da porta
-    camera: {
-      fov: 44,
-      fovMaximo: 62,
-      altura: 4.4,
-      distancia: 10.5,
-      olharAltura: 2.6,
-      suavidade: 5,
-      zFixo: 1.5,
-      meiaLargura: 9,
     },
   },
 };

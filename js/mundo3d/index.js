@@ -13,7 +13,7 @@ import { criarCenaAberta, criarPalco, ehCelular } from "./cena.js";
 import { empurrarDeCaixa, empurrarDeCirculo } from "./colisao.js";
 import { construirMundo } from "./construtor.js";
 import { Controles } from "./controles.js";
-import { criarInterior, criarSalaDePapel } from "./interiores.js";
+import { criarSalaDePapel } from "./interiores.js";
 import { Folha } from "./papel.js";
 import { PoneiPapel, carregarImagem } from "./ponei-papel.js";
 
@@ -91,19 +91,26 @@ function telaDaCasa(casaDados) {
   return TELAS.find((t) => t.id === casaDados.tela);
 }
 
+// cada sala escolhe largura e fundo; o resto das medidas sai disso
+function medidasDaSala(interior) {
+  const base = dados.salaPapel;
+  const largura = interior.largura || base.largura;
+  const fundoZ = interior.fundoZ || base.fundoZ;
+  const margem = dados.raioColisaoMovel + 0.2;
+  return {
+    ...base,
+    largura,
+    fundoZ,
+    limites: { minX: -largura / 2 + margem, maxX: largura / 2 - margem, minZ: fundoZ + 1.4, maxZ: base.maxZ },
+    camera: { ...base.camera, meiaLargura: largura / 2 },
+  };
+}
+
 async function criarLugarInterior(casa, mundo) {
   const interior = casa.dados.interior;
   const tela = telaDaCasa(casa.dados);
-  const salaDePapel = Boolean(interior.moveis);
-  const sala = salaDePapel ? dados.salaPapel : dados.interior;
-  let cena;
-  let caixas = [];
-  if (salaDePapel) {
-    ({ cena, caixas } = criarSalaDePapel(sala, interior));
-  } else {
-    const imagem = interior.fundo ? await carregarImagem(interior.fundo) : null;
-    cena = criarInterior(imagem, sala, interior);
-  }
+  const sala = medidasDaSala(interior);
+  const { cena, caixas } = criarSalaDePapel(sala, interior);
   const pontos = await Promise.all(interior.pontos.map((p) => criarPonto(p, cena)));
   pontos.push({
     dados: {
