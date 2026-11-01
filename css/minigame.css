@@ -19,7 +19,7 @@
 .mg-fundo {
   position: absolute;
   inset: -40px;
-  filter: blur(10px) brightness(0.45) saturate(1.1);
+  filter: blur(3px) brightness(0.62) saturate(1.05);
 }
 
 .mg-app {

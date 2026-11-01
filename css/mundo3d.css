@@ -90,6 +90,45 @@
   animation: balao-aparece 0.3s cubic-bezier(0.2, 1.5, 0.4, 1), balao-flutua 1.6s ease-in-out 0.3s infinite;
 }
 
+/* "Próximo: ..." embaixo do contador de ingredientes */
+#mundo3d-objetivo {
+  position: absolute;
+  z-index: 12;
+  left: max(12px, env(safe-area-inset-left, 0px));
+  top: calc(max(12px, env(safe-area-inset-top, 0px)) + 46px);
+  max-width: 60%;
+  padding: 0.3em 0.8em;
+  border-radius: 8px;
+  background: rgba(26, 16, 48, 0.72);
+  color: var(--creme);
+  font-size: 0.8em;
+  pointer-events: none;
+}
+
+#mundo3d-objetivo[hidden],
+#mundo3d-aviso[hidden] {
+  display: none;
+}
+
+/* porta trancada */
+#mundo3d-aviso {
+  position: absolute;
+  z-index: 13;
+  left: 50%;
+  top: 22%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: min(560px, 86%);
+  padding: 0.6em 1.1em;
+  border-radius: 10px;
+  background: rgba(26, 16, 48, 0.92);
+  box-shadow: 0 0 0 2px var(--rosa);
+  text-align: center;
+  line-height: 1.35;
+  pointer-events: none;
+  animation: aviso-aparece 0.3s ease;
+}
+
 /* botão de ação do celular */
 #mundo3d-acao {
   display: none;

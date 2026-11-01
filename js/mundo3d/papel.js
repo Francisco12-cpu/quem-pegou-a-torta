@@ -7,6 +7,18 @@ import * as THREE from "../vendor/three.min.js";
 // tom de cada face de uma caixa: direita, esquerda, topo, base, frente, trás
 const TONS_DAS_FACES = [0.86, 0.86, 1.06, 0.7, 1, 0.8];
 
+// números "aleatórios" sempre iguais, pro mundo não mudar a cada visita
+export function sorteador(semente) {
+  let s = semente >>> 0;
+  return function () {
+    s = (s + 0x6d2b79f5) >>> 0;
+    let t = s;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
 function texturaPapel(comBorda) {
   const lado = 128;
   const canvas = document.createElement("canvas");
@@ -112,7 +124,7 @@ export class Folha {
   }
 
   // plaquinha de madeira com texto
-  placa(texto, largura, altura, x = 0, y = 0, z = 0) {
+  placa(texto, largura, altura, x = 0, y = 0, z = 0, corTexto = "#c9367f") {
     const canvas = document.createElement("canvas");
     canvas.width = 512;
     canvas.height = Math.round((512 * altura) / largura);
@@ -122,7 +134,7 @@ export class Folha {
     g.strokeStyle = "#8a5a3a";
     g.lineWidth = 14;
     g.strokeRect(0, 0, canvas.width, canvas.height);
-    g.fillStyle = "#c9367f";
+    g.fillStyle = corTexto;
     g.font = "bold " + Math.round(canvas.height * 0.58) + "px Georgia, serif";
     g.textAlign = "center";
     g.textBaseline = "middle";

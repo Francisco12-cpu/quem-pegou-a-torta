@@ -3,21 +3,18 @@
 import * as THREE from "../vendor/three.min.js";
 import { criarCasa } from "./casas-papel.js";
 import { dentroDaCaixa } from "./colisao.js";
-import { Folha } from "./papel.js";
+import {
+  criarArvores,
+  criarCaminhos,
+  criarFonte,
+  criarMorros,
+  criarNuvens,
+  pertoDeCaminho,
+  sortearArvores,
+} from "./decoracao.js";
+import { Folha, sorteador } from "./papel.js";
 
 const FOLGA_FLORES = 1.8; // nenhum tufo nasce colado na casa nem na frente da porta
-
-// números "aleatórios" sempre iguais, pro mundo não mudar a cada visita
-function sorteador(semente) {
-  let s = semente >>> 0;
-  return function () {
-    s = (s + 0x6d2b79f5) >>> 0;
-    let t = s;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
 
 // papel de grama: retalhos recortados de tons próximos, com fibras finas por cima
 function texturaChao(cfg) {
@@ -124,7 +121,7 @@ function texturaTufos() {
   return textura;
 }
 
-function criarTufos(dados, casas) {
+function criarTufos(dados, livre) {
   const r = sorteador(dados.tufos.semente);
   const material = new THREE.MeshBasicMaterial({ map: texturaTufos(), alphaTest: 0.5, side: THREE.DoubleSide });
   const grupo = new THREE.Group();
@@ -161,11 +158,7 @@ function criarTufos(dados, casas) {
 
   const m = new THREE.Matrix4();
   porTipo.forEach((todos, tipo) => {
-    const lista = todos.filter(
-      (t) =>
-        !casas.some((c) => dentroDaCaixa(t.x, t.z, c, FOLGA_FLORES)) &&
-        !dados.areas.some((a) => a.chao && Math.hypot(t.x - a.x, t.z - a.z) < a.raio + 0.6)
-    );
+    const lista = todos.filter((t) => livre(t.x, t.z, FOLGA_FLORES));
     if (!lista.length) return;
     const malha = new THREE.InstancedMesh(geometrias[tipo], material, lista.length);
     lista.forEach((t, i) => {
@@ -190,13 +183,25 @@ function criarChaoDeArea(area) {
   return grupo;
 }
 
-// devolve as casas criadas (motor usa pra colisão e portas)
+// devolve o que o motor precisa: casas (colisão e portas), sólidos redondos e nuvens
 export function construirMundo(cena, dados) {
   const casas = dados.casas.map(criarCasa);
-  cena.add(criarChao(dados), criarTufos(dados, casas));
+
+  // (x, z) está livre de casa, praça e caminho?
+  const livre = (x, z, folga) =>
+    !casas.some((c) => dentroDaCaixa(x, z, c, folga)) &&
+    !dados.areas.some((a) => a.chao && Math.hypot(x - a.x, z - a.z) < a.raio + folga) &&
+    !pertoDeCaminho(x, z, dados.caminhos, folga * 0.5);
+
+  const arvores = sortearArvores(dados, livre);
+  cena.add(criarChao(dados), criarCaminhos(dados.caminhos), criarTufos(dados, livre), criarArvores(arvores, dados.arvores));
+  cena.add(criarMorros(dados.morros), criarFonte(dados.fonte));
   casas.forEach((c) => cena.add(c.grupo));
   dados.areas.forEach((a) => {
     if (a.chao) cena.add(criarChaoDeArea(a));
   });
-  return casas;
+
+  const solidos = arvores.map((a) => ({ x: a.x, z: a.z, raio: dados.arvores.raioColisao }));
+  solidos.push({ x: dados.fonte.x, z: dados.fonte.z, raio: dados.fonte.raio + 0.8 });
+  return { casas, solidos, nuvens: criarNuvens(dados.nuvens, cena, dados.tamanho) };
 }

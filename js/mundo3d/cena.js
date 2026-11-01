@@ -55,7 +55,11 @@ export function criarPalco(canvas) {
 
   new ResizeObserver(ajustar).observe(canvas.parentElement);
 
-  return { camera, ajustar, usarCamera, seguir, desenhar };
+  function info() {
+    return { ...renderer.info.render, geometrias: renderer.info.memory.geometries, texturas: renderer.info.memory.textures };
+  }
+
+  return { camera, ajustar, usarCamera, seguir, desenhar, info };
 }
 
 export function criarCenaAberta(dados) {

@@ -18,7 +18,51 @@ function tabuas(cor) {
   return textura;
 }
 
-// imagem: <img> do cenário; sala: MUNDO3D.interior; dadosInterior: `interior` da casa
+// a casa da Rainbow Dash não tem cenário pintado: um céu com nuvens e arco-íris, feito aqui
+function ceuDeNuvens() {
+  const canvas = document.createElement("canvas");
+  canvas.width = 1024;
+  canvas.height = 576;
+  const g = canvas.getContext("2d");
+  const ceu = g.createLinearGradient(0, 0, 0, 576);
+  ceu.addColorStop(0, "#3f9bdc");
+  ceu.addColorStop(0.7, "#8fd0ef");
+  ceu.addColorStop(1, "#d8f2fb");
+  g.fillStyle = ceu;
+  g.fillRect(0, 0, 1024, 576);
+
+  ["#e8473f", "#f28c38", "#f6d344", "#5bc85a", "#4a9be8", "#8a5bd6"].forEach((cor, i) => {
+    g.strokeStyle = cor;
+    g.lineWidth = 26;
+    g.beginPath();
+    g.arc(512, 620, 470 - i * 26, Math.PI, 0);
+    g.stroke();
+  });
+
+  g.fillStyle = "#ffffff";
+  [
+    [60, 500, 110],
+    [230, 540, 130],
+    [420, 560, 120],
+    [620, 550, 130],
+    [810, 535, 125],
+    [980, 500, 110],
+    [190, 170, 50],
+    [250, 180, 62],
+    [320, 175, 46],
+    [730, 120, 44],
+    [790, 125, 58],
+    [850, 130, 42],
+  ].forEach(([x, y, r]) => {
+    g.beginPath();
+    g.arc(x, y, r, 0, Math.PI * 2);
+    g.fill();
+  });
+  return canvas;
+}
+
+// imagem: <img> do cenário (null = céu de nuvens); sala: MUNDO3D.interior;
+// dadosInterior: `interior` da casa
 export function criarInterior(imagem, sala, dadosInterior) {
   const cena = new THREE.Scene();
   cena.background = new THREE.Color(dadosInterior.corParede);
@@ -29,7 +73,7 @@ export function criarInterior(imagem, sala, dadosInterior) {
   const fundo = sala.fundoZ;
   const frente = sala.frenteZ;
 
-  const textura = new THREE.Texture(imagem);
+  const textura = new THREE.Texture(imagem || ceuDeNuvens());
   textura.colorSpace = THREE.SRGBColorSpace;
   textura.anisotropy = 4;
   textura.needsUpdate = true;

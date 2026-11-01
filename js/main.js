@@ -45,6 +45,12 @@ function comecarMundo3D() {
         aoInteragir: function (ponto) {
           interagirNoMundo(mundo, ponto);
         },
+        aoChegarNoFim: function () {
+          Interface.transicao(function () {
+            mundo.esconder();
+            comecarConfronto();
+          });
+        },
       });
     })
     .then(function () {
@@ -90,6 +96,11 @@ function interagirNoMundo(mundo, ponto) {
     mundo.esconder();
     MotorDialogo.iniciarCena(cena, function () {
       estado.conversou[ponto.id] = true;
+      if (ponto.id === ACOMPANHANTE.id) {
+        // a Pinkie sai da cozinha e vai investigar junto
+        mundo.removerPonto(ponto.id);
+        mundo.acompanhar(ponto.id);
+      }
       voltarProMundo();
     });
   });

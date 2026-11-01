@@ -30,10 +30,12 @@ function recortarAdesivo(imagem) {
   canvas.height = imagem.naturalHeight + BORDA_PX * 2;
   const g = canvas.getContext("2d", { willReadFrequently: true });
 
-  for (let i = 0; i < 16; i++) {
-    const a = (i / 16) * Math.PI * 2;
-    g.drawImage(imagem, BORDA_PX + Math.cos(a) * BORDA_PX, BORDA_PX + Math.sin(a) * BORDA_PX);
-  }
+  // borda em degraus, seguindo a grade do desenho (nada de contorno arredondado na pixel art)
+  [-1, 0, 1].forEach((dx) => {
+    [-1, 0, 1].forEach((dy) => {
+      g.drawImage(imagem, BORDA_PX + dx * BORDA_PX, BORDA_PX + dy * BORDA_PX);
+    });
+  });
   g.globalCompositeOperation = "source-in";
   g.fillStyle = "#fff";
   g.fillRect(0, 0, canvas.width, canvas.height);
@@ -66,7 +68,7 @@ export function criarSombra(raio) {
     new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(canvas), transparent: true, depthWrite: false })
   );
   malha.rotation.x = -Math.PI / 2;
-  malha.position.y = 0.03;
+  malha.position.y = 0.06;
   return malha;
 }
 
@@ -77,6 +79,7 @@ export class PoneiPapel {
     const textura = new THREE.CanvasTexture(canvas);
     textura.colorSpace = THREE.SRGBColorSpace;
     textura.anisotropy = 4;
+    textura.magFilter = THREE.NearestFilter; // de perto, pixels retos em vez de borrados
 
     const largura = (altura * canvas.width) / canvas.height;
     const geometria = new THREE.PlaneGeometry(largura, altura);
