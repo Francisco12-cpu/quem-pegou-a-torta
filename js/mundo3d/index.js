@@ -12,6 +12,7 @@ import { atualizarOpacidade } from "./casas-papel.js";
 import { criarCenaAberta, criarPalco, ehCelular } from "./cena.js";
 import { empurrarDeCaixa, empurrarDeCirculo } from "./colisao.js";
 import { construirMundo } from "./construtor.js";
+import { criarEfeitosDaFesta } from "./festa-efeitos.js";
 import { Controles } from "./controles.js";
 import { criarSalaDePapel } from "./interiores.js";
 import { Folha } from "./papel.js";
@@ -31,7 +32,15 @@ let controles = null;
 let protagonista = null;
 let spriteAtual = null;
 let mundoAberto = null;
-let salaDaFesta = null; // { cena, camera }: só aparece como fundo das cenas finais
+let salaDaFesta = null; // um lugar como os outros, mais `sala` (as medidas)
+let saidaDaFesta = null; // onde se fica no mundo aberto, na porta do celeiro
+let elenco = []; // as pôneis da festa: [{ dados, ponei }]
+let guiaLigado = true;
+let objetivoFixo = null; // texto que substitui o "Próximo: ..." (final do jogo)
+let marcas = []; // [{ alvo: {x, z}, el }]: "Acusar" e exclamações acima das pôneis
+let ator = null; // { ponto, alvo, vx, vz, aoChegar }: quem anda sozinho na cena
+let focoCamera = null; // {x, z} no lugar da protagonista
+let danca = null; // { t, efeitos, atores }
 let portas = []; // um ponto de porta por casa, na mesma ordem de dados.casas
 let nuvens = [];
 let setores = []; // [{ malha, x, z }]: flores e árvores, por pedaço do mapa
@@ -66,6 +75,7 @@ function montar() {
     acao: document.getElementById("mundo3d-acao"),
     objetivo: document.getElementById("mundo3d-objetivo"),
     aviso: document.getElementById("mundo3d-aviso"),
+    marcas: document.getElementById("mundo3d-marcas"),
   };
   palco = criarPalco(el.canvas);
   aplicarQualidade();
@@ -187,10 +197,21 @@ async function criarMundo() {
 
   const casaDaFesta = dados.casas.find((c) => c.fim);
   const medidasFesta = medidasDaSala(casaDaFesta.interior);
+  const festa = criarSalaDePapel(medidasFesta, casaDaFesta.interior);
   salaDaFesta = {
-    cena: criarSalaDePapel(medidasFesta, casaDaFesta.interior).cena,
+    nome: casaDaFesta.nome,
+    cena: festa.cena,
     camera: medidasFesta.camera,
+    limites: medidasFesta.limites,
+    casas: [],
+    caixas: festa.caixas,
+    solidos: [],
+    entrada: medidasFesta.entrada,
+    pontos: await Promise.all(casaDaFesta.interior.pontos.map((p) => criarPonto(p, festa.cena))),
+    sala: medidasFesta,
   };
+  elenco = salaDaFesta.pontos.slice();
+  saidaDaFesta = construido.casas.find((c) => c.dados.fim).saida;
 
   portas = await Promise.all(
     construido.casas.map(async (casa, i) => {
@@ -259,6 +280,11 @@ function atravessar(ponto) {
 // ---- guia: para onde ir agora ----
 
 function atualizarDestino() {
+  if (objetivoFixo !== null) {
+    el.objetivo.textContent = objetivoFixo;
+    el.objetivo.hidden = !objetivoFixo;
+    return;
+  }
   const casa = dados.casas.find((c) => c.fim || !estado.conversou[telaDaCasa(c).exige]);
   const indice = dados.casas.indexOf(casa);
   const donaAqui = lugar.donaDaCasa && !estado.conversou[lugar.donaDaCasa];
@@ -271,6 +297,10 @@ function atualizarDestino() {
 }
 
 function atualizarSetaGuia() {
+  if (!guiaLigado) {
+    setaGuia.visible = false;
+    return;
+  }
   const dx = destino.ponto.x - jogador.x;
   const dz = destino.ponto.z - jogador.z;
   setaGuia.visible = lugar === mundoAberto && Math.hypot(dx, dz) > dados.guia.somePerto;
@@ -331,10 +361,18 @@ function moverAcompanhante(dt) {
   a.ponei.atualizar(dt, a.vx, a.vz, dados.velocidade, palco.camera);
 }
 
+function esconderBalao() {
+  pontoPerto = null;
+  el.balao.hidden = true;
+  el.acao.hidden = true;
+}
+
 function atualizarPontoPerto() {
+  if (!ativo) return;
   let melhor = null;
   let melhorD = Infinity;
   lugar.pontos.forEach((p) => {
+    if (p.dados.semConversa) return;
     const d = Math.hypot(p.dados.x - jogador.x, p.dados.z - jogador.z);
     if (d <= (p.dados.raio || dados.raioInteracao) && d < melhorD) {
       melhor = p;
@@ -347,7 +385,7 @@ function atualizarPontoPerto() {
   el.balao.hidden = !pontoPerto;
   el.acao.hidden = !pontoPerto;
   if (!pontoPerto) return;
-  const texto = TEXTOS[pontoPerto.dados.tipo];
+  const texto = pontoPerto.dados.rotulo || TEXTOS[pontoPerto.dados.tipo];
   el.balao.innerHTML = '<kbd class="so-teclado">E</kbd>' + texto;
   el.acao.textContent = texto;
   el.balao.classList.remove("aparecendo");
@@ -364,6 +402,53 @@ function posicionarBalao() {
   naTela.set(d.x, altura, d.z).project(palco.camera);
   el.balao.style.left = ((naTela.x + 1) / 2) * el.overlay.clientWidth + "px";
   el.balao.style.top = ((1 - naTela.y) / 2) * el.overlay.clientHeight + "px";
+}
+
+function posicionarMarcas() {
+  marcas.forEach((m) => {
+    naTela.set(m.alvo.x, dados.alturaPonei + 0.55, m.alvo.z).project(palco.camera);
+    m.el.style.left = ((naTela.x + 1) / 2) * el.overlay.clientWidth + "px";
+    m.el.style.top = ((1 - naTela.y) / 2) * el.overlay.clientHeight + "px";
+    m.el.hidden = Boolean(pontoPerto) && pontoPerto.dados === m.alvo; // aí já tem o balão
+  });
+}
+
+function moverAtor(dt) {
+  if (!ator) return;
+  const d = ator.ponto.dados;
+  const dx = ator.alvo.x - d.x;
+  const dz = ator.alvo.z - d.z;
+  const distancia = Math.hypot(dx, dz);
+  if (distancia < 0.1) {
+    const aoChegar = ator.aoChegar;
+    ator = null;
+    aoChegar();
+    return;
+  }
+  const velocidade = dados.chegadaApplejack.velocidade;
+  ator.vx = (dx / distancia) * velocidade;
+  ator.vz = (dz / distancia) * velocidade;
+  d.x += ator.vx * dt;
+  d.z += ator.vz * dt;
+  ator.ponto.ponei.grupo.position.set(d.x, 0, d.z);
+}
+
+function atualizarDanca(dt) {
+  danca.t += dt;
+  const t = danca.t;
+  const velocidadeRoda = 0.55;
+  danca.atores.forEach((a, i) => {
+    const angulo = (i / danca.atores.length) * Math.PI * 2 + t * velocidadeRoda;
+    const raioX = 7;
+    const raioZ = 2.3;
+    a.grupo.position.set(Math.cos(angulo) * raioX, 0, 0.4 + Math.sin(angulo) * raioZ);
+    const vx = -Math.sin(angulo) * raioX * velocidadeRoda;
+    const vz = Math.cos(angulo) * raioZ * velocidadeRoda;
+    a.atualizar(dt, vx, vz, dados.velocidade, palco.camera);
+    a.dancar(t, i);
+  });
+  danca.efeitos.atualizar(dt, t);
+  palco.seguir({ x: 0, z: 0 }, dt);
 }
 
 function atualizarArea() {
@@ -419,9 +504,14 @@ function atualizarSetores() {
 }
 
 function atualizar(dt) {
+  if (danca) {
+    atualizarDanca(dt);
+    return;
+  }
   moverJogador(dt);
+  moverAtor(dt);
   protagonista.grupo.position.set(jogador.x, 0, jogador.z);
-  palco.seguir(jogador, dt);
+  palco.seguir(focoCamera || jogador, dt);
   protagonista.atualizar(dt, jogador.vx, jogador.vz, dados.velocidade, palco.camera);
   moverAcompanhante(dt);
 
@@ -431,7 +521,9 @@ function atualizar(dt) {
     if (p.bau) p.bau.atualizar(dt, p === pontoPerto);
     if (!p.ponei) return;
     if (p === pontoPerto) p.ponei.olharPara(jogador.x);
-    p.ponei.atualizar(dt, 0, 0, dados.velocidade, palco.camera);
+    if (ator && p !== ator.ponto) p.ponei.olharPara(ator.ponto.dados.x);
+    const andando = ator && p === ator.ponto;
+    p.ponei.atualizar(dt, andando ? ator.vx : 0, andando ? ator.vz : 0, dados.velocidade, palco.camera);
   });
   lugar.casas.forEach((c) => atualizarOpacidade(c, jogador, palco.camera.position, dt));
   if (lugar === mundoAberto) {
@@ -440,6 +532,7 @@ function atualizar(dt) {
   }
   atualizarSetaGuia();
   posicionarBalao();
+  posicionarMarcas();
 }
 
 function quadro(t) {
@@ -473,9 +566,7 @@ function interagir() {
     return;
   }
   if (ponto.fim) {
-    Musica.efeito("passagem");
-    parar();
-    if (aoChegarNoFim) aoChegarNoFim(fotografar(salaDaFesta));
+    entrarNaFesta();
     return;
   }
   if (ponto.destino) {
@@ -487,7 +578,22 @@ function interagir() {
   if (aoInteragir) aoInteragir(ponto);
 }
 
-// Foto de um lugar visto do meio, sem pôneis (nos diálogos elas aparecem grandes, na frente).
+function entrarNaFesta() {
+  Musica.efeito("passagem");
+  parar();
+  Interface.transicao(function () {
+    if (acompanhante) acompanhante.ponei.grupo.removeFromParent(); // a Pinkie já está lá
+    acompanhante = null;
+    guiaLigado = false;
+    objetivoFixo = "";
+    irPara(salaDaFesta, salaDaFesta.entrada);
+    ligar();
+    Interface.mostrarPlaca(lugar.nome);
+    if (aoChegarNoFim) aoChegarNoFim();
+  });
+}
+
+// Foto de um lugar, sem pôneis (nos diálogos elas aparecem grandes, na frente).
 function fotografar(alvo) {
   const pessoas = [protagonista.grupo];
   if (acompanhante) pessoas.push(acompanhante.ponei.grupo);
@@ -497,7 +603,7 @@ function fotografar(alvo) {
   pessoas.forEach((g) => (g.visible = false));
 
   palco.usarCamera(alvo.camera);
-  palco.seguir({ x: 0, z: 0 }, null);
+  palco.seguir(alvo === mundoAberto ? jogador : { x: 0, z: 0 }, null); // salas: vistas do meio
   const imagem = palco.foto(alvo.cena);
 
   pessoas.forEach((g) => (g.visible = true));
@@ -506,20 +612,26 @@ function fotografar(alvo) {
   return imagem;
 }
 
-function ligar() {
+function ligarSemControle() {
   el.overlay.hidden = false;
   palco.ajustar();
   jogador.vx = jogador.vz = 0;
+  focoCamera = null;
+  esconderBalao();
   atualizarDestino();
-  controles.ligar();
-  ativo = true;
   inicioTela = ultimoT = performance.now();
   if (rafId == null) rafId = requestAnimationFrame(quadro);
 }
 
+function ligar() {
+  ligarSemControle();
+  controles.ligar();
+  ativo = true;
+}
+
 // ---- API usada por main.js ----
 
-// opcoes: { sprite, aoInteragir(ponto) (pônei ou baú), aoChegarNoFim(imagemDaSala) (a festa) }
+// opcoes: { sprite, aoInteragir(ponto) (pônei ou baú), aoChegarNoFim() (entrou na festa) }
 export async function iniciar(opcoes) {
   if (!palco) montar();
   el.overlay.hidden = false; // o canvas precisa ter tamanho
@@ -539,6 +651,106 @@ export function fotoDoLugar() {
 // volta de um diálogo ou do baú: a protagonista continua onde estava
 export function retomar() {
   ligar();
+}
+
+// ---- API do final do jogo (js/final-3d.js) ----
+
+function pontoPorId(id) {
+  return lugar.pontos.find((p) => p.dados.id === id);
+}
+
+export function definirObjetivo(texto) {
+  objetivoFixo = texto;
+  atualizarDestino();
+}
+
+export function definirRotulo(id, texto) {
+  pontoPorId(id).dados.rotulo = texto;
+}
+
+export function definirConversa(id, pode) {
+  pontoPorId(id).dados.semConversa = !pode;
+}
+
+export function limparMarcas() {
+  marcas.forEach((m) => m.el.remove());
+  marcas = [];
+}
+
+// lista: [{ id, texto }] ou [{ id, exclamacao: true }]; id também pode ser "protagonista"
+export function marcarPoneis(lista) {
+  limparMarcas();
+  lista.forEach((m) => {
+    const alvo = m.id === "protagonista" ? jogador : pontoPorId(m.id).dados;
+    const marca = document.createElement("div");
+    marca.className = "mundo3d-marca" + (m.exclamacao ? " exclamacao" : "");
+    if (m.exclamacao) marca.innerHTML = '<img src="assets/itens/exclamacao.png" alt="!" draggable="false" />';
+    else marca.textContent = m.texto;
+    el.marcas.appendChild(marca);
+    marcas.push({ alvo, el: marca });
+  });
+}
+
+export function travarControles() {
+  ativo = false;
+  controles.desligar();
+  esconderBalao();
+}
+
+export function retomarSemControle() {
+  ligarSemControle();
+}
+
+// A Applejack entra pela porta (que fica do lado da câmera) e a câmera olha pra ela.
+export async function chegarApplejack() {
+  const cfg = dados.chegadaApplejack;
+  const ponto = await criarPonto(
+    { id: "applejack", tipo: "ponei", semConversa: true, x: cfg.de.x, z: cfg.de.z },
+    lugar.cena
+  );
+  lugar.pontos.push(ponto);
+  elenco.push(ponto);
+  focoCamera = { x: cfg.ate.x, z: cfg.ate.z };
+  return new Promise((aoChegar) => {
+    ator = { ponto, alvo: cfg.ate, vx: 0, vz: 0, aoChegar };
+  });
+}
+
+// Fim com os ingredientes: todas na porta do celeiro, no mundo aberto.
+export function levarTodasProMundo() {
+  objetivoFixo = "";
+  elenco.forEach((p, i) => {
+    const lugarDela = dados.fimNoMundo[i % dados.fimNoMundo.length];
+    p.dados.x = saidaDaFesta.x + lugarDela.x;
+    p.dados.z = saidaDaFesta.z + lugarDela.z;
+    p.dados.semConversa = true;
+    p.ponei.grupo.position.set(p.dados.x, 0, p.dados.z);
+    p.ponei.olharPara(saidaDaFesta.x);
+    mundoAberto.cena.add(p.ponei.grupo);
+    mundoAberto.pontos.push(p);
+  });
+  irPara(mundoAberto, saidaDaFesta);
+  ligarSemControle();
+}
+
+// A festa de fundo dos créditos: todas dançando em roda.
+export function comecarDanca() {
+  lugar = salaDaFesta;
+  const atores = [...elenco.map((p) => p.ponei), protagonista];
+  atores.forEach((a) => {
+    a.grupo.visible = true;
+    salaDaFesta.cena.add(a.grupo);
+  });
+  danca = { t: 0, efeitos: criarEfeitosDaFesta(salaDaFesta.cena, salaDaFesta.sala), atores };
+  palco.usarCamera(lugar.camera);
+  palco.seguir({ x: 0, z: 0 }, null);
+  ligarSemControle();
+}
+
+export function pararDanca() {
+  if (danca) danca.efeitos.remover();
+  danca = null;
+  esconder();
 }
 
 // tira um ponto do lugar atual (baú já aberto some do mapa, como no 2D)

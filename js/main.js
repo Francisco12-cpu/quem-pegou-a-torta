@@ -7,7 +7,6 @@
 var TRILHA_EXPLORACAO = "passeio";
 
 var carregandoMundo3D = null; // Promise do módulo js/mundo3d/ (só no modo 3D)
-var imagemFundoFinal = null; // no 3D, foto da sala da festa (fundo das cenas finais)
 
 document.addEventListener("DOMContentLoaded", function () {
   // começa a baixar já no menu: ao apertar "Jogar" o mundo costuma estar pronto
@@ -46,12 +45,8 @@ function comecarMundo3D() {
         aoInteragir: function (ponto) {
           interagirNoMundo(mundo, ponto);
         },
-        aoChegarNoFim: function (imagemDaSala) {
-          imagemFundoFinal = imagemDaSala;
-          Interface.transicao(function () {
-            mundo.esconder();
-            comecarConfronto();
-          });
+        aoChegarNoFim: function () {
+          Final3D.comecar(mundo);
         },
       });
     })
@@ -78,6 +73,11 @@ function telaPorId(id) {
 }
 
 function interagirNoMundo(mundo, ponto) {
+  if (ponto.festa) {
+    Final3D.aoInteragir(ponto);
+    return;
+  }
+
   function voltarProMundo() {
     Interface.transicao(function () {
       Musica.trilha(TRILHA_EXPLORACAO);
@@ -221,9 +221,9 @@ function interagirNaTela(indice, ponto) {
 
 function comecarConfronto() {
   Musica.trilha("suspense");
-  MotorDialogo.iniciarCena(comFundo(CENA_06_CONFRONTO, imagemFundoFinal), function () {
+  MotorDialogo.iniciarCena(CENA_06_CONFRONTO, function () {
     Interface.transicao(function () {
-      MotorDialogo.iniciarCena(comFundo(CENA_07_REVELACAO, imagemFundoFinal), function () {
+      MotorDialogo.iniciarCena(CENA_07_REVELACAO, function () {
         Telas.abrirCaso(depoisDoCaso);
       });
     });
@@ -235,7 +235,7 @@ function depoisDoCaso() {
   if (completo) {
     Musica.trilha("festa");
     Interface.mostrarHud(true);
-    MotorDialogo.iniciarCena(comFundo(CENA_08_BONUS_TORTA_NOVA, imagemFundoFinal), function () {
+    MotorDialogo.iniciarCena(CENA_08_BONUS_TORTA_NOVA, function () {
       Telas.abrirFim(true);
     });
     return;

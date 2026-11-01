@@ -439,6 +439,43 @@ kbd {
   transition: transform 0.7s cubic-bezier(0.5, -0.3, 0.7, 1);
 }
 
+.item-juntando {
+  position: absolute;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 0 10px rgba(255, 212, 121, 0.9));
+  transition: transform 1s cubic-bezier(0.45, 0, 0.3, 1);
+}
+
+/* a torta nova, no meio da tela */
+#torta-nova {
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  width: min(46vmin, 340px);
+  transform: translate(-50%, -50%);
+  padding: 8%;
+  background: radial-gradient(circle, rgba(255, 233, 150, 0.95) 0%, rgba(255, 212, 121, 0.45) 45%, transparent 70%);
+  animation: torta-aparece 0.7s cubic-bezier(0.2, 1.6, 0.4, 1);
+}
+
+#torta-nova img {
+  display: block;
+  width: 100%;
+  image-rendering: pixelated;
+  animation: flutua 2.4s ease-in-out infinite;
+}
+
+@keyframes torta-aparece {
+  from {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+
 /* ---- transição entre telas ---- */
 
 #transicao {

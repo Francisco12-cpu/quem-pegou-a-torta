@@ -68,7 +68,7 @@ export function criarSombra(raio) {
     new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(canvas), transparent: true, depthWrite: false })
   );
   malha.rotation.x = -Math.PI / 2;
-  malha.position.y = 0.06;
+  malha.position.y = 0.09; // acima dos tapetes
   return malha;
 }
 
@@ -107,6 +107,17 @@ export class PoneiPapel {
   // vira de lado pra olhar para o ponto x (NPC olhando pra quem chega perto)
   olharPara(x) {
     if (Math.abs(x - this.grupo.position.x) > 0.3) this.lado = x > this.grupo.position.x ? -1 : 1;
+  }
+
+  // Dança bem exagerada: chamar logo depois de atualizar(). t: tempo; i: quem é, pra não
+  // dançarem todas no mesmo passo.
+  dancar(t, i) {
+    const batida = t * 6 + i * 0.9;
+    const esticar = 1 + Math.sin(batida * 2) * 0.12;
+    this.pivo.position.y += Math.abs(Math.sin(batida)) * 0.6;
+    this.pivo.rotation.z += Math.sin(batida * 0.5) * 0.34;
+    this.pivo.scale.x /= esticar;
+    this.pivo.scale.y *= esticar;
   }
 
   // vx, vz: velocidade atual; vMax: velocidade máxima; camera: pra olhar pra ela

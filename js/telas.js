@@ -503,15 +503,16 @@ var Telas = (function () {
     container.innerHTML = html;
   }
 
-  function abrirFim(completo, aoCreditos) {
+  // aoCreditos / aoVoltarDosCreditos (opcionais): ao abrir e ao fechar os créditos
+  function abrirFim(completo, aoCreditos, aoVoltarDosCreditos) {
     Musica.trilha("festa");
     Interface.mostrarHud(false);
     CenaEspecial.mostrar("final", function () {
-      mostrarFim(completo, aoCreditos);
+      mostrarFim(completo, aoCreditos, aoVoltarDosCreditos);
     });
   }
 
-  function mostrarFim(completo, aoCreditos) {
+  function mostrarFim(completo, aoCreditos, aoVoltarDosCreditos) {
 
     $("tela-fim-titulo").textContent = TEXTOS_FIM.titulo;
     $("tela-fim-texto").textContent = textoDoProtagonista(completo ? TEXTOS_FIM.subtitulo100 : TEXTOS_FIM.subtitulo);
@@ -541,6 +542,7 @@ var Telas = (function () {
       abrirCreditos(function () {
         mostrar("tela-fim");
         Musica.trilha("festa");
+        aoVoltarDosCreditos && aoVoltarDosCreditos();
       }, "Voltar");
       aoCreditos && aoCreditos();
     };

@@ -1,4 +1,4 @@
-"""desenhar-itens.py — pixel art 32x32 dos ingredientes da torta (farinha, maçã, canela, mel).
+"""desenhar-itens.py — pixel art 32x32 dos ingredientes da torta e da exclamação do final.
 
 Cada item é desenhado por formas com sombreamento em faixas (luz vindo de cima à esquerda) e
 recebe um contorno escuro automático. Sai em 128x128 com os mesmos nomes de sempre em
@@ -225,7 +225,19 @@ def mel():
     t.salvar("mel")
 
 
+def exclamacao():
+    t = Tela()
+    barra = t.faixa(15.5, 4.5, 15.5, 18, 8) | t.faixa(15.5, 16, 15.5, 20.5, 5.5)
+    ponto = t.elipse(15.5, 26, 4, 4)
+    t.rampa(barra, AMBAR, 15, 11, 7, 11, 0.2)
+    t.rampa(ponto, AMBAR, 15, 25, 5, 5, 0.2)
+    t.pintar(t.faixa(13.4, 4, 13.4, 13, 1.4), AMBAR[4])
+    t.pintar(t.elipse(13.8, 24.6, 1, 1), AMBAR[4])
+    t.salvar("exclamacao")
+
+
 if __name__ == "__main__":
+    exclamacao()
     farinha()
     maca()
     canela()

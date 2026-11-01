@@ -161,3 +161,77 @@ body.toque #mundo3d-acao:not([hidden]) {
 body.toque #mundo3d-dica {
   display: none;
 }
+
+/* ---- marcas acima das pôneis: "Acusar" e exclamação ---- */
+
+#mundo3d-marcas {
+  position: absolute;
+  inset: 0;
+  z-index: 11;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.mundo3d-marca {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  padding: 0.25em 0.7em;
+  border-radius: 8px;
+  background: var(--rosa);
+  color: #fff;
+  font-family: var(--fonte-titulo);
+  font-weight: 700;
+  font-size: 0.85em;
+  white-space: nowrap;
+  box-shadow: 0 0 0 3px var(--roxo-noite), 0 4px 10px rgba(0, 0, 0, 0.35);
+}
+
+.mundo3d-marca[hidden] {
+  display: none;
+}
+
+.mundo3d-marca.exclamacao {
+  padding: 0;
+  background: none;
+  box-shadow: none;
+  animation: exclamacao-pula 0.45s cubic-bezier(0.2, 1.8, 0.4, 1);
+}
+
+.mundo3d-marca.exclamacao img {
+  display: block;
+  width: clamp(40px, 11vmin, 64px);
+  image-rendering: pixelated;
+  filter: drop-shadow(0 3px 0 rgba(26, 16, 48, 0.5));
+}
+
+@keyframes exclamacao-pula {
+  from {
+    transform: translate(-50%, -40%) scale(0.2);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, -100%) scale(1);
+    opacity: 1;
+  }
+}
+
+/* ---- créditos com a festa de fundo ---- */
+
+body.creditos-festa #tela-fim {
+  visibility: hidden;
+}
+
+body.creditos-festa #tela-creditos .tela-fundo {
+  display: none;
+}
+
+body.creditos-festa #tela-creditos .tela-veu {
+  background: rgba(26, 16, 48, 0.28);
+}
+
+body.creditos-festa #mundo3d-dica,
+body.creditos-festa #mundo3d-objetivo,
+body.creditos-festa #mundo3d-balao,
+body.creditos-festa #mundo3d-acao {
+  display: none !important;
+}

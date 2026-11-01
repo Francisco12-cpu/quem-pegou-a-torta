@@ -114,8 +114,7 @@ var MUNDO3D = {
   //   interior — a sala de papel: `largura` e `fundoZ` (tamanho, opcionais), `parede`, `piso`,
   //              `moveis` (peças do kit em js/mundo3d/moveis-papel.js; x e z no chão da sala,
   //              z mais negativo = mais perto da parede do fundo), `pontos` (pôneis e baús)
-  //   fim      — passar pela porta encerra a exploração (vai para o confronto); a sala dela
-  //              só aparece como fundo das cenas finais
+  //   fim      — a sala do confronto final: sem saída, conduzida por js/final-3d.js
   casas: [
     {
       id: "confeitaria",
@@ -340,7 +339,7 @@ var MUNDO3D = {
       z: -50,
       giro: -15,
       interior: {
-        // não se anda aqui: esta sala é o fundo do confronto e das cenas finais
+        // o confronto: o jogador anda pela sala e fala com todas (js/final-3d.js)
         largura: 24,
         fundoZ: -7,
         corTapete: "#ff9ccd",
@@ -370,9 +369,29 @@ var MUNDO3D = {
           { tipo: "presentes", x: 7, z: -2.8 },
           { tipo: "tapete", x: 0, z: 0, raio: 3.4, cor: "#ff6fb0", corMeio: "#ffd479", corCentro: "#ff9ccd" },
         ],
-        pontos: [],
+        pontos: [
+          { id: "pinkie", tipo: "ponei", festa: true, x: -6.6, z: 1.2 },
+          { id: "twilight", tipo: "ponei", festa: true, x: -3.8, z: -1.5 },
+          { id: "fluttershy", tipo: "ponei", festa: true, x: 0.4, z: -1.9 },
+          { id: "rarity", tipo: "ponei", festa: true, x: 4.2, z: -1.2 },
+          { id: "rainbow-dash", tipo: "ponei", festa: true, x: 6.6, z: 1.2 },
+        ],
       },
     },
+  ],
+
+  // a Applejack chegando na festa (a porta fica do lado da câmera)
+  chegadaApplejack: { de: { x: 0, z: 9 }, ate: { x: 0, z: 2.8 }, velocidade: 3.2 },
+
+  // no fim com a torta, onde cada pônei fica em volta da protagonista, na ordem de `pontos` da
+  // festa (a última é a Applejack)
+  fimNoMundo: [
+    { x: -3.6, z: 0.4 },
+    { x: 3.6, z: 0.4 },
+    { x: -2, z: -2.2 },
+    { x: 2, z: -2.2 },
+    { x: 6.4, z: -0.6 },
+    { x: -6.4, z: -0.6 },
   ],
 
   // As casinhas da vila: enfeite (não abrem), todas iguais, mudando só as cores e o lugar.

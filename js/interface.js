@@ -5,6 +5,9 @@
 var Interface = (function () {
   "use strict";
 
+  var TEMPO_INGREDIENTES_MS = 1800; // o último ingrediente chegou no meio da tela
+  var TEMPO_TORTA_MS = 2600; // quanto a torta fica sozinha na tela
+
   var el = {};
   var timerPlaca = null;
 
@@ -144,6 +147,51 @@ var Interface = (function () {
     }, 280);
   }
 
+  // ---- a torta nova: os ingredientes voam do contador pro meio da tela ----
+
+  function juntarIngredientes(aoTerminar) {
+    var jogoRect = $("jogo").getBoundingClientRect();
+    var centroX = jogoRect.width / 2;
+    var centroY = jogoRect.height * 0.44;
+    var imagens = ORDEM_INGREDIENTES.map(function (chave, i) {
+      var slot = el.contador.querySelector('[data-ingrediente="' + chave + '"]').getBoundingClientRect();
+      var img = document.createElement("img");
+      img.src = ITENS[chave].imagem;
+      img.className = "item-juntando";
+      img.style.left = slot.left - jogoRect.left + "px";
+      img.style.top = slot.top - jogoRect.top + "px";
+      img.style.width = slot.width + "px";
+      img.style.height = slot.height + "px";
+      img.style.transitionDelay = i * 0.22 + "s";
+      el.voo.appendChild(img);
+      var dx = centroX - (slot.left - jogoRect.left + slot.width / 2);
+      var dy = centroY - (slot.top - jogoRect.top + slot.height / 2);
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          img.style.transform = "translate(" + dx + "px, " + dy + "px) scale(2.4) rotate(360deg)";
+        });
+      });
+      return img;
+    });
+
+    setTimeout(function () {
+      imagens.forEach(function (img) {
+        img.remove();
+      });
+      Musica.efeito("interagir");
+      var torta = document.createElement("div");
+      torta.id = "torta-nova";
+      torta.innerHTML = '<img src="' + ITENS.torta.imagem + '" alt="' + ITENS.torta.nome + '" draggable="false" />';
+      el.voo.appendChild(torta);
+      setTimeout(aoTerminar, TEMPO_TORTA_MS);
+    }, TEMPO_INGREDIENTES_MS);
+  }
+
+  function esconderTortaNova() {
+    var torta = $("torta-nova");
+    if (torta) torta.remove();
+  }
+
   // ---- plaquinha com o nome do lugar ----
 
   function mostrarPlaca(texto) {
@@ -239,6 +287,8 @@ var Interface = (function () {
     mostrarHud: mostrarHud,
     atualizarIngredientes: atualizarIngredientes,
     voarIngrediente: voarIngrediente,
+    juntarIngredientes: juntarIngredientes,
+    esconderTortaNova: esconderTortaNova,
     transicao: transicao,
     mostrarPlaca: mostrarPlaca,
     mostrarCartao: mostrarCartao,

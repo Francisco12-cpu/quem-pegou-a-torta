@@ -160,6 +160,13 @@ var MotorDialogo = (function () {
     limparOpcoes();
     atualizarPalco(fala);
 
+    // `transicoes` na cena: cada fala entra com uma animação curta (css/dialogo.css)
+    if (cenaAtualObj.transicoes) {
+      elementos.jogo.classList.remove("fala-entrando");
+      void elementos.jogo.offsetWidth;
+      elementos.jogo.classList.add("fala-entrando");
+    }
+
     var ehNarrador = !fala.quemFala || fala.quemFala === "narrador";
     var p = buscarPersonagem(fala.quemFala);
     var nomeExibido = ehNarrador ? "" : p ? p.nome : "";
@@ -350,6 +357,7 @@ var MotorDialogo = (function () {
     ativo = false;
     Interface.esconderCartao();
     elementos.jogo.classList.remove("dialogo-ativo");
+    elementos.jogo.classList.remove("fala-entrando");
     var callback = aoTerminarCallback;
     aoTerminarCallback = null;
     if (typeof callback === "function") callback();
